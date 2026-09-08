@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="uk-UA">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/work.css">
+    <link rel="stylesheet" href="/css/air-datepicker.css">
+    <link rel="stylesheet" href="/css/interval.css">
+    <link rel="icon" type="image/png" href="./img/favicon.png">
+    <title>Виробництво</title>
+</head>
+
+<body>
+    <div class="container">
+        <div style="max-width:  800px;"><h1>Надходження та переробка жирової сировини</h1></div>
+        <div class="work__btn" id="accounting" >Облік та звітність</div>
+        <div class="container__user">
+            <div class="user__name" id="user"></div>
+            <div class="container__user__info" >
+                <div class="user__form__close">
+                    <button class="close-btn" id="user-form-close"></button>
+                </div>
+                <div class="user__exit__btn">Вихід</div>
+            </div>
+        </div>
+        
+    </div>
+    <!-- Картинки, навигация, интервал, сформувати -->
+    <div class="container-header">
+        <!-- Картинки -->
+        <div class="logo">
+            <div class="foto" data-num="10"><img src="/img/screen.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="1"><img src="/img/screen2.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="2"><img src="/img/screen3.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="3"><img src="/img/screen4.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="4"><img src="/img/screen5.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="5"><img src="/img/screen6.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="6"><img src="/img/screen7.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="7"><img src="/img/screen8.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="8"><img src="/img/screen9.jpg" alt="Фото  лого"></div>
+            <div class="foto" data-num="9"><img src="/img/screen1.jpg" alt="Фото  лого"></div>
+            
+        </div>
+        <!-- Командная панель интервал -->
+        <div>
+            <!-- кнопки перехода -->
+            <div class="tabs__nav">
+                <button class="tabs__nav-btn active" type="button" id="supplys-btn" data-tab="#tab_1" >Надходження</button>
+                <button class="tabs__nav-btn" type="button" id="recasts-btn" data-tab="#tab_2">Переробка</button>
+                <button class="tabs__nav-btn" type="button" id="list-supplys-btn" data-tab="#tab_3">Список надходжень</button>
+                <button class="tabs__nav-btn" type="button" id="list-recasts-btn" data-tab="#tab_4">Список переробок</button>
+            </div>
+            <!-- даты начала и конца периода -->
+            <div class="tabs__nav">
+                <label for="dateStart">з:</label>
+                <input class="form-control nav-date" type="text" name="dateStart" id="dateStart" data-tooltip="Дата початку періода">
+                <label for="dateFinish">по:</label>
+                <input class="form-control nav-date" type="text" name="dateFinish" id="dateFinish" data-tooltip="Дата закінчення періода">
+                <button class="nav-btn" type="button" id="interval-btn" data-tooltip="Стандатні періоди звіту">Період звіту</button>
+            </div>
+            <div class="nav-btn" type="button" id="load-data">
+                <h3 >Сформувати</h3>
+            </div>
+            <div class="nav-btn" type="button" id="btnRequest" style="display: none;">
+                <h3>Тест</h3>
+            </div>
+        </div>
+    </div>
+    <!-- Таблицы и их командные панели  -->
+    <div class="tabs__content ">
+        <!-- Поступления -->
+        <div class="tabs__item active" id="tab_1">
+            <!-- Панель команд выбора поставок -->
+            <div class="container-if">
+                <div class="work__btn" id="new-supply">Нове надходження</div>
+                <div class="work__btn" id="open-supply">Відкрити надходження</div>
+                <div class="work__btn" id="print-list-supplys">Друк списку надходжень</div>
+            </div>
+            <!-- Панель команд для фильтрации -->
+            <div class="container-if">
+                <div class="checkbox_div" style="display: none;">
+                    <input class="checkbox_input" type="checkbox" id="sortSupply" name="sortSupply" />
+                    <label class="checkbox_label" for="sortSupply">Сортувати за зростанням</label>
+                </div>
+                <div class="if-btn" id="if-clear">
+                    Очистити фільтр
+                </div>
+                <div class="if-btn" id="if_provider">
+                    постачальник
+                </div>
+                <div class="if-btn" id="if-carrier">
+                    перевізник
+                </div>
+                <div class="if-btn" id="if_transport">
+                    транспорт
+                </div>
+                <div class="if-btn" id="if_product">
+                    номенклатурa
+                </div>
+            </div>
+            <!-- Таблица поставок -->
+            <div class="table-container">
+                <table id="table-supplys" >
+                    <thead>
+                        <tr>
+                            <th  style="width: 40px;" onclick="sortTable(0, this, this.closest('table').id)" data-type="string"><div class="table__sort">№</div></th>
+                            <th  style="width: 100px;" onclick="sortTable(1, this, this.closest('table').id)"  data-type="date"><div class="table__sort">Дата</div></th>
+                            <th  style="width: 200px;" onclick="sortTable(2, this, this.closest('table').id)" data-type="string"><div class="table__sort">Постачальник</div></th>
+                            <th  style="width: 200px;" onclick="sortTable(3, this, this.closest('table').id)" data-type="string"><div class="table__sort">Перевізник</div></th>
+                            <th  style="width: 200px;" onclick="sortTable(4, this, this.closest('table').id)" data-type="string"><div class="table__sort">Транспорт</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(5, this, this.closest('table').id)" data-type="string"><div class="table__sort">Номер ТТН</div></th>
+                            <th  style="width: 100px;" onclick="sortTable(6, this, this.closest('table').id)" data-type="string"><div class="table__sort">Номенклатура</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(7, this, this.closest('table').id)" data-type="number"><div class="table__sort">Відсоток постачальник</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(8, this, this.closest('table').id)" data-type="number"><div class="table__sort">Відсоток лабораторія</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(9, this, this.closest('table').id)" data-type="number"><div class="table__sort">Вага, кг</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(10, this, this.closest('table').id)" data-type="number"><div class="table__sort">Жир, кг</div></th>
+                            <th  style="width: 160px;" onclick="sortTable(11, this, this.closest('table').id)" data-type="string"><div class="table__sort">Нотатки</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                            <tr style="background-color: #f2f2f2;">
+                            <td  colspan="9" style="text-align: right; font-weight: bold;">Усього: </td>
+                            <td  style="text-align: right; font-weight: bold;" id="table-supplys-sum-qty"></td>
+                            <td  style="text-align: right; font-weight: bold;" id="table-supplys-sum-fat"></td>
+                            <td  style="text-align: center;">X</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <!-- Переработки -->
+        <div class="tabs__item" id="tab_2">
+            <div class="container-if">
+                <div class="work__btn" id="new-recast" >Нова переробка</div>
+                <div class="work__btn" id="open-recast" >Відкрити переробку</div>
+                <div class="work__btn" id="print-recast">Друк переробки</div>
+                <div class="work__btn" id="print-list-recast">Друк списку переробок</div>
+            </div>
+            <!-- Командная панель фильтрации -->
+            <div class="container-if">
+                <div class="checkbox_div" style="display: none;">
+                    <input class="checkbox_input" type="checkbox" id="sortRecast" name="sortRecast" />
+                    <label class="checkbox_label" for="sortRecast">Сортувати за зростанням</label>
+                </div>
+                <div class="if-btn_recast" id="if-clear-recast">
+                    Очистити фільтр
+                </div>
+                <h3>Фільтр:</h3>
+                <div class="if-btn_recast" id="if_provider_recast">
+                    постачальник
+                </div>
+                <div class="if-btn_recast" id="if_product_recast">
+                    номенклатурa
+                </div>
+            </div>
+            <!-- Таблица переработок -->
+            <div class="table-container">
+                <table id="table-recast">
+                    <thead>
+                        <tr>
+                            <th  style="width: 40px;" onclick="sortTable(0, this, this.closest('table').id)" data-type="string"><div class="table__sort">№</div></th>
+                            <th  style="width: 100px;" onclick="sortTable(1, this, this.closest('table').id)" data-type="date"><div class="table__sort">Дата</div></th>
+                            <th  style="width: 200px;" onclick="sortTable(2, this, this.closest('table').id)" data-type="string"><div class="table__sort">Постачальник</div></th>
+                            <th  style="width: 200px;" onclick="sortTable(3, this, this.closest('table').id)"  data-type="string"><div class="table__sort">Транспорт</div></th>
+                            <th  style="width: 180px;" onclick="sortTable(4, this, this.closest('table').id)" data-type="string"><div class="table__sort"X>Сировина до переробки</div></th>
+                            <th  style="width: 90px;" onclick="sortTable(5, this, this.closest('table').id)" data-type="number"><div class="table__sort">Жир, % лабораторія</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(6, this, this.closest('table').id)" data-type="number"><div class="table__sort">Жир, кг</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(7, this, this.closest('table').id)" data-type="number"><div class="table__sort">Кислота, кг</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(8, this, this.closest('table').id)" data-type="number"><div class="table__sort">Сода, кг</div></th>
+                            <th  style="width: 80px;" onclick="sortTable(9, this, this.closest('table').id)" data-type="number"><div class="table__sort">Піногасник, кг</div></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr style="background-color: #f2f2f2;">
+                            <td  colspan="6" style="text-align: right; font-weight: bold;">Усього: </td>
+                            <td  style="text-align: right; font-weight: bold;" id="table-recasts-sum-fat"></td>
+                            <td  style="text-align: right; font-weight: bold;" id="table-recasts-sum-acid"></td>
+                            <td  style="text-align: right; font-weight: bold;" id="table-recasts-sum-sodium"></td>
+                            <td  style="text-align: right; font-weight: bold;" id="table-recasts-sum-foamy"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        
+        </div>
+        <!-- Список поступлений -->
+        <div class="tabs__item" id="tab_3">
+            <div class="table-container">
+                <table id="table-supplys-list"></table>
+            </div>
+        </div>
+        <!-- Список переработок -->
+        <div class="tabs__item" id="tab_4">
+            <div class="container-if">
+                <div class="work__btn" id="new-recast-list" >Нова переробка</div>
+                <div class="work__btn" id="open-recast-list" >Відкрити переробку</div>
+                <div class="work__btn" id="collapse-all">Згорнути все</div>
+                <div class="work__btn" id="expand-all">Розгорнути все</div>
+            </div>
+            <div class="table-container">
+                <table id="table-recasts-list"></table>
+            </div>
+        </div>
+    </div>
+    <!-- Моддальнное - интервал -->
+    <div class="interval__form" id="interval-win">
+        <div class="container__interval__form">
+            <div class="interval" id="interval">
+                <div class="interval_btn" data-interval="m01">
+                    <h3 data-interval="m01">Січень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m02">
+                    <h3 data-interval="m02">Лютий</h3>
+                </div>
+                <div class="interval_btn" data-interval="m03">
+                    <h3 data-interval="m03">Березень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv1">
+                    <h3 data-interval="kv1">1 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="input-years">
+                    <div class="form-group">
+                        <div class="dropdown">
+                            <button class="dropdown-button">2026 р.</button>
+                            <ul class="dropdown-list">
+                                <li class="dropdown-list-item" data-value="2022">2022 р.</li>
+                                <li class="dropdown-list-item" data-value="2023">2023 р.</li>
+                                <li class="dropdown-list-item" data-value="2024">2024 р.</li>
+                                <li class="dropdown-list-item" data-value="2025">2025 р.</li>
+                                <li class="dropdown-list-item" data-value="2026">2026 р.</li>
+                            </ul>
+                            <input type="text" name="select-category" class="dropdown-input-hidden">
+                        </div>
+                    </div>
+                </div>
+                <div class="interval_btn" data-interval="m04">
+                    <h3 data-interval="m04">Квітень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m05">
+                    <h3 data-interval="m05">Травень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m06">
+                    <h3 data-interval="m06">Червень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv2">
+                    <h3 data-interval="kv2">2 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p06">
+                    <h3 data-interval="p06">півріччя</h3>
+                </div>
+                <div class="interval_btn" data-interval="m07">
+                    <h3 data-interval="m07">Липень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m08">
+                    <h3 data-interval="m08">Серпень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m09">
+                    <h3 data-interval="m09">Вересень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv3">
+                    <h3 data-interval="kv3">3 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p09">
+                    <h3 data-interval="p09">9 місяців</h3>
+                </div>
+                <div class="interval_btn" data-interval="m10">
+                    <h3 data-interval="m10">Жовтень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m11">
+                    <h3 data-interval="m11">Листопад</h3>
+                </div>
+                <div class="interval_btn" data-interval="m12">
+                    <h3 data-interval="m12">Грудень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv4">
+                    <h3 data-interval="kv4">4 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p12">
+                    <h3 data-interval="p12">Рік</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="interval__form-backdrop" id="backdrop" onclick="closeInterval()"></div>
+
+    <div id="toast-container">
+    <!-- Сюда будут добавляться сообщения -->
+    </div>
+
+    <script src="/js/air-datepicker.js"></script>
+    <script src="/js/work.js"></script>
+    <script src="/js/interval.js"></script>
+</body>
+
+</html>

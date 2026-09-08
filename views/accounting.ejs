@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/accounting.css">
+    <link rel="stylesheet" href="/css/air-datepicker.css">
+    <link rel="stylesheet" href="/css/interval.css">
+    <title>Облік</title>
+</head>
+
+<body>
+    <div class="container" >
+        <!-- Боковое меню -->
+        <div class="menu__tabs">
+            <div class="tabs__btn" id="reports-btn" data-tab="tab_1">
+                Звіти
+            </div>
+            <div class="tabs__btn" id="prodaction-btn" data-tab="tab_2">
+                Складські операції
+            </div>
+            <div class="tabs__btn" id="counterparties-btn" data-tab="tab_3" data-tooltip="Довідник Контрагенти">
+                Контрагенти
+            </div>
+            <div class="tabs__btn" id="transports-btn" data-tab="tab_4" data-tooltip="Довідник Транспорта">
+                Транспорт
+            </div>
+            <div class="tabs__btn" id="products-btn" data-tab="tab_5" data-tooltip="Довідник Номенклатура">
+                Номенклатура
+            </div>
+
+        </div>    
+        <!-- Рабочий раздел для зон обработки данных -->
+        <div class="container__tabs">
+            <!-- Отчеты -->
+            <div class="container__tab" id="tab_1" >
+                <!-- Командная панель -->
+                <div class="countainer__commands">
+                    <div class="image__btn__update" id="report-update" data-tooltip="Оновити дані звіту" onclick="reqTurnoverBalance()"></div>
+                    <div class="checkbox_div">
+                        <input class="checkbox_input" type="checkbox" id="report-checkbox" name="sortSupply" />
+                        <label class="checkbox_label" for="report-checkbox">Дата:</label>
+                    </div>
+                    <div class="container__interval">
+                        <div class="input__interval ">
+                            <label for="report-date-start" >період з:</label>
+                            <input type="text" class="form-control" id="report-date-start" onchange="clearTableReport()">
+                        </div>
+                        <div class="input__interval ">
+                            <label for="report-date-start" >по:</label>
+                            <input type="text" class="form-control" id="report-date-finish" onchange="clearTableReport()">
+                        </div>
+                        <div class="input__interval invisible">
+                            <!-- <label for="report-date-on" >по:</label> -->
+                            <input type="text" class="form-control" id="report-date-on" onchange="clearTableReport()">
+                        </div>
+                        <div class="btn__interval" id="interval-btn" data-tooltip="Стандатні періоди звіту">...</div>
+                    </div>
+                    <div class="select__report">
+                        <label for="report-select">Номенклатура:</label>    
+                        <select name="selectTable" id="report-select" onchange="clearTableReport()">
+                                <option value="14">Жирні кислоти (експорт)</option>
+                                <option value="15">Кислота сірчана технічна</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Блок данных -->
+                <!-- Контейнер таблицы отчета -->
+                <div class="container">
+                    <div class="container__table__report" style="width: 1400px;">
+                    <div class="content__layer"></div>
+                        <table class="table__report" id="table-report">
+                            <thead>
+                                <tr>
+                                    <th  style="width: 250px;" onclick="sortTable(0, this, this.closest('table').id)" data-type="dateTime"><div class="table__sort">Дата</div></th>
+                                    <th  style="width: 600px;" onclick="sortTable(1, this, this.closest('table').id)" data-type="string"><div class="table__sort">Документ</div></th>
+                                    <th  style="width: 250px;" onclick="sortTable(2, this, this.closest('table').id)" data-type="number"><div class="table__sort">Прихід/Видаток (кг)</div></th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" style="text-align: right;">Залишок на початок:</th>
+                                    <th  id="report-OB" style="text-align: right;">0,00</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2">Надходження за період:</td>
+                                    <td id="report-PS">0,00</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">Видаток за період:</td>
+                                    <td id="report-NS">0,00</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" >Залишок на кінець:</td>
+                                    <td id="report-EB">0,00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <!-- Иформация отчета -->
+                    <div class="container__unit">
+
+                    </div>
+                </div>
+            </div>
+            <!-- Склад -->
+            <div class="container__tab" id="tab_2"></div>
+            <!-- Контрагенты -->
+            <div class="container__tab" id="tab_3">
+                <!-- Командная панель -->
+                <div class="countainer__commands">
+                    <div class="image__btn__update" id="counterparty-update" data-tooltip="Виконати оновлення списку"></div>
+                    <div class="image__btn__add" id="counterparty-add" data-tooltip="Додати нового контрагента"></div>
+                    <div class="image__btn__save" id="counterparty-save" data-tooltip="Зберегти дані контрагента" onclick="reqSaveCounterparty()"></div>
+                    <div class="image__btn__delete" id="counterparty-delete" data-tooltip="Видалити контрагента" onclick="reqDeleteItemDirectory('counterparties')"></div>
+                    <div class="input__find">
+                        <label for="input-find-counterparty">Пошук:</label>
+                        <input type="text" id="input-find-counterparty" placeholder="Введить строку пошуку" onfocus="this.select();">
+                    </div>
+                </div>
+                <div class="container">
+                    <!-- Блок с таблицей -->
+                    <div class="container__table">
+                        <table id="table-counterparties"></table>
+                    </div>
+                    <!-- Блок с карточкой контрагента -->
+                    <div class="container__unit">
+                        <div class="input__unit locked-cell">
+                            <label for="counterparty-id" >Код:</label>
+                            <input type="text" id="counterparty-id">
+                        </div>
+                        <div class="input__unit">
+                            <label for="counterparty-name">Найменування:</label>
+                            <input type="text" id="counterparty-name" autocomplete="foobar" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="counterparty-full-name">Повне найменування:</label>
+                            <input type="text" id="counterparty-full-name" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="counterparty-OKPO">Код за ЄДРПОУ/РНОКПП:</label>
+                            <input type="text" id="counterparty-OKPO" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="counterparty-address">Адреса:</label>
+                            <input type="text" id="counterparty-address" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="counterparty-telefon">Телефон:</label>
+                            <input type="text" id="counterparty-telefon" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="counterparty-id-bas">Код у BAS:</label>
+                            <input type="text" id="counterparty-id-bas" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="select__unit">    
+                            <label for="counterparty-type">Ознака особи:</label>
+                            <select name="selectTable" id="counterparty-type">
+                                <option value="1">Юридична особа</option>
+                                <option value="0">Фізична особа</option>
+                            </select>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+            <!-- Транспорт -->
+            <div class="container__tab" id="tab_4">
+                <!-- Командная панель -->
+                <div class="countainer__commands">
+                    <div class="image__btn__update" id="transport-update" data-tooltip="Виконати оновлення списку"></div>
+                    <div class="image__btn__add" id="transport-add" data-tooltip="Додати новий транспорт"></div>
+                    <div class="image__btn__save" id="transport-save" data-tooltip="Зберегти дані транспорта" onclick="reqSaveTransport()"></div>
+                    <div class="image__btn__delete" id="counterparty-delete" data-tooltip="Видалити транспорт" onclick="reqDeleteItemDirectory('transports')"></div>
+                    <div class="input__find">
+                        <label for="input-find-transport">Пошук:</label>
+                        <input type="text" id="input-find-transport" placeholder="Введить строку пошуку" onfocus="this.select();">
+                    </div>
+                    <div class="command__btn" id="autoName" data-tooltip="Формує назву транспорту із назв тягача і причепа">
+                        Сформувати найменування
+                    </div>
+                </div>
+                <div class="container">
+                    <!-- Блок с таблицей -->
+                    <div class="container__table">
+                        <table id="table-transport"></table>
+                    </div>
+                    <!-- Блок с карточкой транспорта -->
+                    <div class="container__unit">
+                        <div class="input__unit locked-cell">
+                            <label for="transport-id" >Код:</label>
+                            <input type="text" id="transport-id">
+                        </div>
+                        <div class="input__unit">
+                            <label for="transport-name">Найменування:</label>
+                            <input type="text" id="transport-name" autocomplete="foobar" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="tractor-name">Тягач найменування:</label>
+                            <input type="text" id="tractor-name" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="trailer-name">Причіп найменування:</label>
+                            <input type="text" id="trailer-name" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="tractor-model">Тягач модель:</label>
+                            <input type="text" id="tractor-model" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="tractor-weight">Тягач вага:</label>
+                            <input type="text" id="tractor-weight" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="tractor-weight-full">Тягач повна вага:</label>
+                            <input type="text" id="tractor-weight-full" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="tractor-size">Тягач габаритні розміри:</label>
+                            <input type="text" id="tractor-size" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="trailer-model">Причіп модель:</label>
+                            <input type="text" id="trailer-model" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="trailer-weight">Причіп вага:</label>
+                            <input type="text" id="trailer-weight" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="trailer-weight-full">Причіп повна вага:</label>
+                            <input type="text" id="trailer-weight-full" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="trailer-size">Причіп габаритні розмири:</label>
+                            <input type="text" id="trailer-size" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="driver">Водій:</label>
+                            <input type="text" id="driver" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="driver-license">Посвідчення водія:</label>
+                            <input type="text" id="driver-license" autocomplete="off" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="transport-id-bas">Код у BAS:</label>
+                            <input type="text" id="transport-id-bas" autocomplete="off" onfocus="this.select();">
+                        </div>
+                    </div>
+                 </div>
+
+            </div>
+            <!-- Номенклатуря -->
+            <div class="container__tab" id="tab_5">
+                <!-- Командная панель -->
+                <div class="countainer__commands">
+                    <div class="image__btn__update" id="product-update" data-tooltip="Виконати оновлення списку"></div>
+                    <div class="image__btn__add" id="product-add" data-tooltip="Додати нову номенклатуру"></div>
+                    <div class="image__btn__save" id="product-save" data-tooltip="Зберегти дані номенклатури"></div>
+                    <div class="image__btn__delete" id="counterparty-delete" data-tooltip="Видалити номенклатуру" onclick="reqDeleteItemDirectory('products')"></div>
+                    <div class="input__find">
+                        <label for="input-find-product">Пошук:</label>
+                        <input type="text" id="input-find-product" placeholder="Введить строку пошуку" onfocus="this.select();">
+                    </div>
+                </div>
+                <!-- Блок данных -->
+                <div class="container">
+                    <!-- Блок с таблицей -->
+                    <div class="container__table">
+                        <table id="table-product"></table>
+                    </div>
+                    <!-- Блок с карточкой транспорта -->
+                    <div class="container__unit">
+                        <div class="input__unit locked-cell">
+                            <label for="product-id" >Код:</label>
+                            <input type="text" id="product-id">
+                        </div>
+                        <div class="input__unit">
+                            <label for="product-name">Найменування:</label>
+                            <input type="text" id="product-name" autocomplete="foobar" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="product-full-name">Повне найменування:</label>
+                            <input type="text" id="product-full-name" autocomplete="foobar" onfocus="this.select();">
+                        </div>
+                        <div class="input__unit">
+                            <label for="product-id-bas">Код у BAS:</label>
+                            <input type="text" id="product-id-bas" autocomplete="foobar" onfocus="this.select();">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Моддальнное - интервал -->
+    <div class="interval__form" id="interval-win">
+        <div class="container__interval__form">
+            <div class="interval" id="interval">
+                <div class="interval_btn" data-interval="m01">
+                    <h3 data-interval="m01">Січень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m02">
+                    <h3 data-interval="m02">Лютий</h3>
+                </div>
+                <div class="interval_btn" data-interval="m03">
+                    <h3 data-interval="m03">Березень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv1">
+                    <h3 data-interval="kv1">1 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="input-years">
+                    <div class="form-group">
+                        <div class="dropdown">
+                            <button class="dropdown-button">2026 р.</button>
+                            <ul class="dropdown-list">
+                                <li class="dropdown-list-item" data-value="2022">2022 р.</li>
+                                <li class="dropdown-list-item" data-value="2023">2023 р.</li>
+                                <li class="dropdown-list-item" data-value="2024">2024 р.</li>
+                                <li class="dropdown-list-item" data-value="2025">2025 р.</li>
+                                <li class="dropdown-list-item" data-value="2026">2026 р.</li>
+                            </ul>
+                            <input type="text" name="select-category" class="dropdown-input-hidden">
+                        </div>
+                    </div>
+                </div>
+                <div class="interval_btn" data-interval="m04">
+                    <h3 data-interval="m04">Квітень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m05">
+                    <h3 data-interval="m05">Травень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m06">
+                    <h3 data-interval="m06">Червень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv2">
+                    <h3 data-interval="kv2">2 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p06">
+                    <h3 data-interval="p06">півріччя</h3>
+                </div>
+                <div class="interval_btn" data-interval="m07">
+                    <h3 data-interval="m07">Липень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m08">
+                    <h3 data-interval="m08">Серпень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m09">
+                    <h3 data-interval="m09">Вересень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv3">
+                    <h3 data-interval="kv3">3 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p09">
+                    <h3 data-interval="p09">9 місяців</h3>
+                </div>
+                <div class="interval_btn" data-interval="m10">
+                    <h3 data-interval="m10">Жовтень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m11">
+                    <h3 data-interval="m11">Листопад</h3>
+                </div>
+                <div class="interval_btn" data-interval="m12">
+                    <h3 data-interval="m12">Грудень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv4">
+                    <h3 data-interval="kv4">4 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p12">
+                    <h3 data-interval="p12">Рік</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="interval__form-backdrop" id="backdrop" onclick="closeInterval()"></div>
+
+    <!-- Окно информации о связанных с удаляемым элементом объектах -->
+    <div class="inform__form" id="inform-win">
+        <div id="directory-name" style="display: none;"></div>
+        <div id="inform-head"></div>
+        <!-- Контейнер с таблицей -->
+        <div class="container__table__inform">
+            <table id="table-inform">
+                <thead>
+                    <tr>
+                        <th>Посилання на пов’язані записи об’єкта що видаляється</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="inform__form-backdrop" onclick="closeModal()"></div>
+
+    <div id="toast-container">
+    <!-- Сюда будут добавляться сообщения -->
+    </div>
+
+
+    <script src="/js/air-datepicker.js"></script>
+    <script src="/js/accounting.js"></script>
+    <script src="/js/interval.js"></script>
+
+</body>

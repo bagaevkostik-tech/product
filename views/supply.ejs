@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="uk-UA">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Надходження</title>
+    <link rel="stylesheet" href="/css/supply.css">
+    <link rel="stylesheet" href="/css/air-datepicker.css">
+    <!-- <link rel="icon" type="image/png" href="favicon.ico"> -->
+</head>
+
+<body>
+    <div style="display: none;" id="id-supply">
+        <%= supply %>
+    </div>
+    <!-- Командная панель Сохранить -->
+    <div class="container">
+        <div class="main__btn" id="save-exit-btn">
+            Зберегти та вийти
+        </div>
+        <div class="main__btn" id="save-btn">
+            Зберегти
+        </div>
+        <div class="main__btn" id="exit-btn">
+            Вихід
+        </div>
+    </div>
+    <!-- Иифа номер и дата поставки -->
+    <div class="container__main">
+        <label for="number-supply" >Надходження №:</label>
+        <input type="text" class="input__main" style="width: 80px;" id="number-supply" autocomplete="foobar" onfocus="this.select();" data-tooltip="Для редагування натисність кнопку">
+        <div class="image__btn__edit"  id="edit-number-btn" data-tooltip="Натисніть, для редагування номера"></div>
+        <label for="dateSupply">Дата:</label>
+        <input type="text" class="form-control main__date" id="dateSupply" style="width: 180px;" onfocus="this.select();">
+    </div>
+    <br>
+    <!-- Постачальник -->
+    <div class="container">
+        <div class="select__name">
+            Постачальник:
+        </div>
+        <div class="select">
+            <select id="provider"></select>
+        </div>
+        <div class="image__btn__book" id="counterparties-btn"></div>
+        <div class="image__btn__remove40" id="counterparties-delete-btn"></div>
+    </div>
+    <!-- Перевозчик -->
+    <div class="container">
+        <div class="select__name">
+            Перевізник:
+        </div>
+        <div class="select">
+            <select id="carrier"></select>
+        </div>
+        <div class="image__btn__book" id="carriers-btn"></div>
+        <div class="image__btn__remove40" id="carriers-delete-btn"></div>
+    </div>
+    <!-- Транспорт -->
+    <div class="container">
+        <div class="select__name">
+            Транспорт:
+        </div>
+        <div class="select">
+            <select id="transport"></select>
+        </div>
+        <div class="image__btn__book" id="transports-btn"></div>
+        <div class="image__btn__remove40" id="transport-delete-btn"></div>
+        <label for="ttn" class="select__name" style="width: 100px;">ТТН №:</label>
+        <input type="text" class="input__main" style="font-size: 20px;" id="ttn" placeholder="Введить № ТТН" autocomplete="foobar" onfocus="this.select();">
+    </div>
+    <br>
+    <!-- Командная панель таблицы поступления товаров -->
+    <div class="container__commands">
+        <div class="image__btn__add" id="new-row-btn" data-tooltip="Додати нову строку"></div>
+        <div class="image__btn__remove" id="delete-row-btn" data-tooltip="Видалити строку"></div>
+        <div class="command__btn" id="read-only-not" data-tooltip="Зняти заборону на редагування">
+            Редагувати
+        </div>
+    </div>
+    <!-- Таблица поступлениия -->
+    <div class="table-container">
+        <table class="tb__body" id="product-table">
+            <thead>
+                <tr>
+                    <th  style="width: 350px;">Номенклатура</th>
+                    <th  style="width: 140px;">Вага, кг</th>
+                    <th  style="width: 140px;">% жира від постачальника</th>
+                    <th  style="width: 140px;">Жир, кг</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td >Усього:</td>
+                    <td id="sum-qty"></td>
+                    <td  style="text-align: center;">X</td>
+                    <td id="sum-fat"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <br>
+    <!-- Подал -->
+    <div class="container">
+        <label class="label__notes" for="notes">Коментар:</label>
+        <input type="text" class="input__notes" id="notes" placeholder="Введить коментар" autocomplete="foobar" onfocus="this.select();">
+    </div>
+    <!-- Модальное Выбор контрагента -->
+    <div class="modal" id="counterparties" style="width: 830x;">
+        <h2 style="text-align: center;">Вибір контрагента</h2>
+        <!-- Командная панель таблицы выбора контрагента -->
+        <div class="container__commands">
+            <div class="image__btn__updete__48" onclick="reqCounterparties()"></div>
+            <div class="choice__btn" id="counterparty-btn">Обрати</div>
+            <div class="image__btn__add__48" id="unit-counterparty-btn" data-tooltip="Додати нову строку"></div>
+            <div class="image__btn__edit__48" id="open-counterparty-btn" data-tooltip="Змінити єлемент"></div>
+            <div>
+                <label for="input-counterparty" class="label__input">Пошук:</label>
+                <input type="text" class="input__box" id="input-counterparty" placeholder="Введить строку пошуку" onfocus="this.select();">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="table-counterparties"></table>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="backdrop"></div>
+    <!-- Модальное выбор транспорта -->
+    <div class="modal" id="transports" style="width: 830px;">
+        <h2 style="text-align: center;">Вибір транспорта</h2>
+
+        <div class="container__commands">
+            <div class="image__btn__updete__48" onclick="reqTransports()"></div>
+            <div class="choice__btn" id="transport-btn">Обрати</div>
+            <div class="image__btn__add__48" id="unit-transport-btn" data-tooltip="Додати нову строку"></div>
+            <div class="image__btn__edit__48" id="open-transport-btn" data-tooltip="Змінити єлемент"></div>
+            <div style="margin-left: 100px;">
+                <label for="input-transport" class="label__input">Пошук:</label>
+                <input type="text" class="input__box" id="input-transport" placeholder="Введить строку пошуку" onfocus="this.select();">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="table-transports"></table>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="backdrop"></div>
+    <!-- Модальное выбор номенклатуры -->
+    <div class="modal" id="products" style="width: 830px;">
+        <h2 style="text-align: center;">Вибір номенклатури</h2>
+        <div class="container__commands">
+            <div class="image__btn__updete__48" onclick="reqProducts()"></div>
+            <div class="choice__btn" id="product-btn">Обрати</div>
+        </div>
+        <div class="table-container">
+            <table id="table-products-choice"></table>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="backdrop"></div>
+    <!-- Модальное элемент - контрагент -->
+    <div class="modal2" id="unit-counterparty">
+        <h2 style="text-align: center;" id="counterparty-form-name"></h2>
+        <br>
+        <div class="container">
+            <div class="product__btn" style="width: 200px;" id="counterparty-save-exit">Зберегти та вийти</div>
+            <div class="product__btn" style="width: 200px;" id="counterparty-save">Зберегти</div>
+            <div class="product__btn" style="width: 200px;" id="counterparty-exit">Вихід</div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="block__directory__name">
+                <label for="counterparty-name" style="font-size: 1.2rem;font-weight: bold;">Найменування
+                    контрагента:</label>
+                <input type="text" class="input__directory__name" id="counterparty-name" autocomplete="off" onfocus="this.select();">
+            </div>
+        </div>
+        <br>
+        <div class="container__directory">
+            <div class="block__directory">
+                <label for="counterparty-fullName" class="label__directory">Повне найменування контрагента:</label>
+                <input type="text" class="input__directory" id="counterparty-fullName" autocomplete="off" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="counterparty-OKPO" class="label__directory">Код за ЄДРПОУ/РНОКПП:</label>
+                <input type="text" class="input__directory" id="counterparty-OKPO" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="counterparty-address" class="label__directory">Адреса контрагента:</label>
+                <input type="text" class="input__directory" id="counterparty-address" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="counterparty-telefon" class="label__directory">Телефон контрагента:</label>
+                <input type="text" class="input__directory" id="counterparty-telefon" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="counterparty-id-bas" class="label__directory">Код у BAS:</label>
+                <input type="text" class="input__directory" id="counterparty-id-bas" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="counterparty-type" class="label__directory">Тип контрагента:</label>
+                <div class="select__unit">
+                    <select name="select-counterpartyType" id="counterparty-type">
+                        <option value="1">Юридична особа</option>
+                        <option value="0">Фізична особа</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop2" id="backdrop2"></div>
+    <!-- Модальное элемент - транспорт -->
+    <div class="modal2" id="unit-transport">
+        <h2 style="text-align: center;" id="transport-form-name"></h2>
+        <br>
+        <div class="container">
+            <div class="product__btn" style="width: 200px;" id="transport-save-exit">Зберегти та вийти</div>
+            <div class="product__btn" style="width: 200px;" id="transport-save">Зберегти</div>
+            <div class="product__btn" style="width: 200px;" id="transport-exit">Вихід</div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="block__directory__name">
+                <label for="transport-name" style="font-size: 1.2rem;font-weight: bold;">Найменування
+                    транспорту:</label>
+                <input type="text" class="input__directory__name" id="transport-name" autocomplete="foobar">
+            </div>
+            <div class="product__btn" id="transport-auto-namber">Автоматично</div>
+            <div id="transport-id"></div>
+        </div>
+        <br>
+        <div class="container__directory">
+            <div class="block__directory">
+                <label for="tractor-name" class="label__directory">Найменування тягача:</label>
+                <input type="text" class="input__directory" id="tractor-name" autocomplete="foobar">
+            </div>
+            <div class="block__directory">
+                <label for="tractor-model" class="label__directory">Модель тягача:</label>
+                <input type="text" class="input__directory" id="tractor-model" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="tractor-weight" class="label__directory">Вага тягача:</label>
+                <input type="text" class="input__directory" id="tractor-weight" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="tractor-weight-full" class="label__directory">Повна вага тягача:</label>
+                <input type="text" class="input__directory" id="tractor-weight-full" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="tractor-size" class="label__directory">Розміри тягача:</label>
+                <input type="text" class="input__directory" id="tractor-size" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+            </div>
+            <div class="block__directory">
+                <label for="trailer-name" class="label__directory">Найменування причепа:</label>
+                <input type="text" class="input__directory" id="trailer-name" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="trailer-model" class="label__directory">Модель причепа:</label>
+                <input type="text" class="input__directory" id="trailer-model" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="trailer-weight" class="label__directory">Вага причепа:</label>
+                <input type="text" class="input__directory" id="trailer-weight" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="trailer-weight-full" class="label__directory">Повна вага причепа:</label>
+                <input type="text" class="input__directory" id="trailer-weight-full" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="trailer-size" class="label__directory">Розміри причепа:</label>
+                <input type="text" class="input__directory" id="trailer-size" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+            </div>
+            <div class="block__directory">
+                <label for="driver" class="label__directory">Водій:</label>
+                <input type="text" class="input__directory" id="driver" autocomplete="foobar" onfocus="this.select();">
+            </div>
+            <div class="block__directory">
+                <label for="driver-license" class="label__directory">Посвідчення водія:</label>
+                <input type="text" class="input__directory" id="driver-license" autocomplete="foobar" onfocus="this.select();">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop2" id="backdrop2"></div>
+
+
+
+    <div id="toast-container">
+        <!-- Сюда будут добавляться сообщения -->
+    </div>
+
+    <script src="/js/air-datepicker.js"></script>
+    <script src="/js/supply.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,44 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body  {
+    margin: 100px;
+    text-align: center;
+    background: #e4e6e6;
+}
+
+.container {
+    display: block;
+    background: rgb(246, 241, 241);
+    text-align: center;
+    margin-left: 300px;
+    margin-right: 300px;
+    padding: 100px;
+
+    border: 1px solid black;
+    border-radius: 15px;
+}
+
+button {
+    padding: 5px 80px;
+    background-color: #e1f5f3;
+    cursor: pointer;
+}
+
+input {
+    padding: 5px 10px;
+    background-color: #f0f0f0; /* Светло-серый фон */
+    color: blue; /* Синий цвет текста */}
+
+input,button {
+    font-size: 18px;
+    margin: 5px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+button:hover {
+    background: greenyellow;
+}

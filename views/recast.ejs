@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Переробка</title>
+    <link rel="stylesheet" href="/css/recast.css">
+    <link rel="stylesheet" href="/css/air-datepicker.css">
+    <link rel="stylesheet" href="/css/interval.css">
+</head>
+
+<body>
+    <div style="display: none;" id="id-recast">
+        <%= recast %>
+    </div>
+    <!-- Сохранить Выйти -->
+    <div class="container">
+        <div class="main__btn" id="save-exit-btn">
+            Зберегти та вийти
+        </div>
+        <div class="main__btn" id="save-btn">
+            Зберегти
+        </div>
+        <div class="main__btn" id="exit-btn">
+            Вихід
+        </div>
+    </div>
+    <br>
+    <!-- Номер Дата -->
+    <div class="container__main">
+        <label for="number-recast">Переробка №:</label>
+        <input type="text" class="input__main" style="width: 90px;" id="number-recast" autocomplete="foobar">
+        <div class="image__btn__edit__main" id="edit-number-btn" data-tooltip="Натисніть, для редагування номера"></div>
+        <label for="date-recast">Дата:</label>
+        <input type="text" class="form-control main__date" id="date-recast" style="width: 180px;"
+            onfocus="this.select();">
+    </div>
+    <br>
+    <!-- Операции -->
+    <div class="container">
+        <!-- Поступления -->
+        <div class="operation" style="width: 750px;">
+            <h3>Обрані надходження для переробки</h3>
+            <!-- Панель команд поступлений -->
+            <div class="container__interval">
+                <div class="image__btn__add" id="supplys-open" data-tooltip="Додати надходження."></div>
+                <div class="image__btn__remove" id="supply-remove" data-tooltip="Видалити обраний рядок із надходженням."></div>
+                <div class="input__interval ">
+                    <label for="date-start" >з:</label>
+                    <input class="form-control" type="text" id="date-start">
+                </div>
+                <div class="input__interval ">
+                    <label for="date-finish">по:</label>
+                    <input class="form-control" type="text" id="date-finish">
+                </div>
+                <div class="btn__interval" id="interval-btn" data-tooltip="Стандатні періоди звіту">...</div>
+            </div>
+            <br>
+            <!-- Таблица поступлений -->
+            <div class="container">
+                <div>
+                    <div class="table-container" style="width: 720px;height: 190px;">
+                        <table id="table-supplys">
+                            <thead>
+                                <tr>
+                                    <th  style="width: 110px;">Дата</th>
+                                    <th  style="width: 50px;">№</th>
+                                    <th  style="width: 320px;">Постачальник</th>
+                                    <th  >Транспорт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>    
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Установка жирности LAB -->
+        <div class="operation" style="width: 750px;">
+            <h3>Встановлення відсотка жирності надходжень</h3>
+            <br>
+
+            <!-- Командная панель установки жирности -->
+            <div class="container">
+                <div class="table__btn" id="lab-recast">
+                    Додати до переробки
+                </div>
+                <div class="table__btn" id="lab-save">
+                    Зберегти
+                </div>
+            </div>
+            <br>
+            <!-- Таблица установки жирности -->
+            <div class="container__interval">
+                <div class="table-container" style="width: 750px; height: 190px;">
+                    <table id="table-lab">
+                        <thead>
+                            <tr>
+                                <th  style="width: 110px;">Дата</th>
+                                <th  style="width: 50px;">№</th>
+                                <th  style="width: 200px;">Постачальник</th>
+                                <th  style="width: 90px;">Вага, кг</th>
+                                <th  style="width: 90px;">% постач.</th>
+                                <th  style="width: 90px;">% Наш</th>
+                                <th  style="width: 90px;">Жир, кг</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>    
+                        <tfoot>
+                            <tr>
+                                <td colspan="3">Усього:</td>
+                                <td id="sum-qty-lab">0</td>
+                                <td >X</td>
+                                <td >X</td>
+                                <td id="sum-fat-lab">0</td>
+                            </tr>
+                        </tfoot>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Переработка материалы -->
+        <div class="operation" style="width: 1080px;">
+            <h3>Використання матеріалів для переробки</h3>
+            <br>
+            <div class="table-container" style="width: 1060px;">
+                <table id="table-recast">
+                    <thead>
+                        <tr>
+                            <th  style="width: 110px;">Дата</th>
+                            <th  style="width: 50px;">№</th>
+                            <th  style="width: 200px;">Номенклатура</th>
+                            <th  style="width: 90px;">% лабораторія</th>
+                            <th  style="width: 90px;">Вага (жир), кг</th>
+                            <th  style="width: 90px;">Кислота, кг</th>
+                            <th  style="width: 90px;">Сода, кг</th>
+                            <th  style="width: 90px;">Піногасник, кг</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>    
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">Усього:</td>
+                            <td id="sum-fat">0</td>
+                            <td id="sum-acid">0</td>
+                            <td id="sum-sodium">0</td>
+                            <td id="sum-foamy">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="container">
+                <div class="image__btn__remove" id="recast-delete" style="width: 60px;" data-tooltip="Видалити обраний рядок із переробкой."></div>
+            </div>
+       </div>
+       <!-- Типовые нормы использования материалов -->
+        <div class="operation" style="width: 420px;">
+            <h3>Типові норми використання матеріалів</h3>
+            <br>
+            <div class="container">
+                <div>
+                    <div class="table__dir" style="width: 340px;">
+                        <table id="table-sample"></table>
+                    </div>
+                </div>
+                <!-- Командная панель (вертикальная) -->
+                <div class="container__btn">
+                    <div class="image__btn__calculate" id="sample-move" data-tooltip="Перерахувати витрати матеріалів <br> згідно з типовими нормами."></div>
+                    <div class="image__btn__add" id="sample-new" data-tooltip="Додати норми витрат матеріалів."></div>
+                    <div class="image__btn__edit" id="sample-open" data-tooltip="Змінити норми витрат матеріалів."></div>
+                    <div class="image__btn__remove" id="sample-remove" data-tooltip="Видалити обрані норми <br> витрат матеріалів."></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное типовые варианты -->
+    <div class="modal2" id="sample-modal">
+        <div id="id-sample" style="display: none;"></div>
+        <h2 style="text-align: center;">Типові норми витрат матеріалів</h2>
+        <div class="container">
+            <label for="name-sample" class="select__name" style="width: 160px;">Назва варіанта:</label>
+            <input type="text" class="input__main" style="width: 300px;" id="name-sample" autocomplete="foobar"
+                onfocus="this.select();" value="Типовий варіант витрат">
+            <label for="acid-sample" class="select__name">Кислота сірчана:</label>
+            <input type="number" class="input__main" id="acid-sample" autocomplete="foobar" onfocus="this.select();"
+                value="0.00" step="0.01" onchange="formatInput(this)"">
+            <label for=" sodium-sample" class="select__name">Сода каустична:</label>
+            <input type="number" class="input__main" id="sodium-sample" autocomplete="foobar" onfocus="this.select();"
+                value="0.00" step="0.01" onchange="formatInput(this)">
+            <label for="foamy-sample" class="select__name">Піногасник:</label>
+            <input type="number" class="input__main" id="foamy-sample" autocomplete="foobar" onfocus="this.select();"
+                value="0.00" step="0.01" onchange="formatInput(this)">
+            <!-- Командгая панель -->
+            <div class="container">
+                <div class="table__btn" id="save-sample">
+                    Зберегти
+                </div>
+                <div class="table__btn" id="exit-sample">
+                    Вийти
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop2" id="backdrop"></div>
+
+    <!-- Модальное поставки -->
+    <div class="modal2" id="supplys-modal">
+        <h2 style="text-align: center;">Надходження, що потребують перероблення</h2>
+        <br>
+        <!-- Команды - Выбрать... -->
+        <div class="container">
+            <div class="table__btn" id="supply-choice">
+                Обрати для перероблення
+            </div>
+            <div class="table__btn" id="supply-exit" style="width: 90px;text-align: center;">
+                Вихід
+            </div>
+            <div class="table__btn" id="sopply-update">
+                Оновити записи
+            </div>
+            <div class="checkbox_div">
+                <input class="checkbox_input" type="checkbox" id="supplysAll" name="sortSupply"
+                    onchange="getSupplys()" />
+                <label class="checkbox_label" for="supplysAll">Усі</label>
+            </div>
+        </div>
+        <!-- Таблица выбора поставок -->
+        <div class="container-supplys-choice">
+            <!-- Шапка таблицы выбора поставок -->
+            <div class="container">
+                <h3 style="width: 110px;">Дата</h3>
+                <h3 style="width: 50px;">№</h3>
+                <h3 style="width: 220px;">Постачальник</h3>
+                <h3 style="width: 220px;">Транспорт</h3>
+            </div>
+            <!-- Таблица -->
+            <div class="table__dir__supplys">
+                <table id="table-supplys-choice"></table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop2" id="backdrop"></div>
+
+    <!-- Моддальнное - интервал -->
+    <div class="interval__form" id="interval-win">
+        <div class="container__interval__form">
+            <div class="interval" id="interval">
+                <div class="interval_btn" data-interval="m01">
+                    <h3 data-interval="m01">Січень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m02">
+                    <h3 data-interval="m02">Лютий</h3>
+                </div>
+                <div class="interval_btn" data-interval="m03">
+                    <h3 data-interval="m03">Березень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv1">
+                    <h3 data-interval="kv1">1 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="input-years">
+                    <div class="form-group">
+                        <div class="dropdown">
+                            <button class="dropdown-button">2026 р.</button>
+                            <ul class="dropdown-list">
+                                <li class="dropdown-list-item" data-value="2022">2022 р.</li>
+                                <li class="dropdown-list-item" data-value="2023">2023 р.</li>
+                                <li class="dropdown-list-item" data-value="2024">2024 р.</li>
+                                <li class="dropdown-list-item" data-value="2025">2025 р.</li>
+                                <li class="dropdown-list-item" data-value="2026">2026 р.</li>
+                            </ul>
+                            <input type="text" name="select-category" class="dropdown-input-hidden">
+                        </div>
+                    </div>
+                </div>
+                <div class="interval_btn" data-interval="m04">
+                    <h3 data-interval="m04">Квітень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m05">
+                    <h3 data-interval="m05">Травень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m06">
+                    <h3 data-interval="m06">Червень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv2">
+                    <h3 data-interval="kv2">2 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p06">
+                    <h3 data-interval="p06">півріччя</h3>
+                </div>
+                <div class="interval_btn" data-interval="m07">
+                    <h3 data-interval="m07">Липень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m08">
+                    <h3 data-interval="m08">Серпень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m09">
+                    <h3 data-interval="m09">Вересень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv3">
+                    <h3 data-interval="kv3">3 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p09">
+                    <h3 data-interval="p09">9 місяців</h3>
+                </div>
+                <div class="interval_btn" data-interval="m10">
+                    <h3 data-interval="m10">Жовтень</h3>
+                </div>
+                <div class="interval_btn" data-interval="m11">
+                    <h3 data-interval="m11">Листопад</h3>
+                </div>
+                <div class="interval_btn" data-interval="m12">
+                    <h3 data-interval="m12">Грудень</h3>
+                </div>
+                <div class="interval_btn" data-interval="kv4">
+                    <h3 data-interval="kv4">4 квартал</h3>
+                </div>
+                <div class="interval_btn" data-interval="p12">
+                    <h3 data-interval="p12">Рік</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="interval__form-backdrop" onclick="closeInterval()"></div>
+
+
+    <!-- Всплывающие окна сообщений -->
+    <div id="toast-container">
+        <!-- Сюда будут добавляться сообщения -->
+    </div>
+
+    <script src="/js/air-datepicker.js"></script>
+    <script src="/js/recast.js"></script>
+    <script src="/js/interval.js"></script>
+</body>
+
+</html>

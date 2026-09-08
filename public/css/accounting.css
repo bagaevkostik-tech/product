@@ -1,0 +1,857 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border: 0;
+    outline: 0;
+}
+
+html {
+    font-size: 15px;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+    color: #000;
+}
+
+/* Общий подход для большинства браузеров */
+input[type="number"] {
+    appearance: none;
+    -moz-appearance: textfield;
+    /* Для Firefox */
+}
+
+/* Специально для WebKit браузеров (Chrome, Safari) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    display: none;
+    /* Для некоторых WebKit браузеров */
+}
+
+.container {
+    display: flex;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.countainer__commands {
+    display: flex;
+    margin: 5px 0 10px 15px;
+    height: 60px;
+    gap: 15px;
+}
+
+.container__unit {
+    display: block;
+}
+
+/* Стилизация выбора интервала дат */
+.container__interval {
+    display: flex;
+    margin-left: 5px;
+    width: 600px;
+    align-items: center; /* Выравнивание по вертикали */
+    justify-content: center;
+    gap: 15px; /* Расстояние между label и input */
+}
+
+/* Контейнер таблицы */
+.container__table__inform {
+    margin: 10px;
+    height: 100%; /* Высота блока */
+    overflow-y: auto; /* Прокрутка по вертикали */
+    border: 1px solid #ccc;
+}
+
+/* Фиксация шапки */
+.container__table__inform table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.container__table__inform th {
+    position: sticky;
+    top: 0;
+    text-align: center;
+    font-size: 1rem;
+    background-color: #f2f2f2; /* Обязательный фон */
+    z-index: 2; /* Шапка поверх контента */
+    padding: 10px;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Тень для красоты */
+}
+
+.container__table__inform  th, td {
+    word-wrap: break-word; /* Перенос длинных слов */
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#inform-head {
+    font-size: 24px;
+    text-align: center;
+    color:blue ;
+}
+
+/* Стилизация модальных окон */
+.inform__form {
+    display: none;
+}
+
+.inform__form.open {
+    display: flex;
+    position: fixed;
+    flex-direction: column;
+    width: 700px;
+    height: 800px;
+
+    top: 50px;
+    transform: translateX(-50%);
+    left: 50%;
+    background: #fff;
+    z-index: 200;
+    padding: 1.5rem;
+    border-radius: 5px;
+}
+
+.inform__form.open+.inform__form-backdrop {
+    display: block;
+}
+
+.inform__form-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 100;
+}
+/* Конец стилизации модальных окон */
+
+
+/* Делаем группу полей гибкой для одной строки */
+.input__interval {
+    display: flex;
+    align-items: center; /* Выравнивание по вертикали */
+    gap: 15px; /* Расстояние между label и input */
+    height: 40px;
+}
+
+/* Задаем фиксированную ширину для label */
+.input__interval label {
+    /* width: 200px; */
+    margin-left: 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+/* Задаем ширину для input */
+.input__interval input {
+    width: 180px; /* Фиксированная ширина */
+    height: 50px;
+    padding-right: 40px;
+    box-sizing: border-box; /* Чтобы padding не увеличивал общую ширину */
+
+    text-align: center;
+    border: 1.2px solid #ddd;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+.input__interval.invisible {
+    display: none;
+}
+
+.btn__interval {
+    display: block;
+    width: 50px;
+    height: 50px;
+    
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    border-radius: 20%;
+
+    font-size: 30px;
+    text-align: center;
+    padding-top: 2%;
+    cursor: pointer;
+}
+
+/* Эффекты при наведении и нажатии */
+.btn__interval:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn__interval:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn__interval.invisible {
+    display: none;
+}
+
+.main__date {
+    height: 44px;
+
+    padding-right: 32px;
+    border: 0.5px solid rgb(224, 220, 220);
+    border-right: 2px solid #ddd;
+    cursor: pointer;
+}
+
+
+#report-date-start, #report-date-finish,
+#report-date-on {
+    background-image: url('../img/date_calendar32.png');
+    background-repeat: no-repeat;
+    background-position: right; /* Позиция иконки */
+}
+
+
+
+.menu__tabs {
+    display: block;
+    width: 320px;
+    height: 875px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+/* Конец стилизации дат отчета */
+
+.tabs__btn {
+    display: flex;
+    align-items: center;      /* Выравнивает по вертикали */
+    justify-content: center;  /* Выравнивает по горизонтали */
+    height: 80px;            /* Обязательно задайте высоту блоку */
+    width: 300px;
+    margin-top: 5px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    background-color: #115343;
+    font-size: 1.4rem;
+    color: #fff;
+    cursor: pointer;
+}
+
+.tabs__btn.active {
+    background-color: yellow;
+    color: blue;
+}
+
+/* Эффекты при наведении и нажатии */
+.tabs__btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.tabs__btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.container__tabs {
+    width: 1500px;
+    display: block;
+}
+
+.container__tab {
+    display: none;
+}
+
+.container__tab.active {
+    display: block;
+    height: 875px;
+}
+
+.container__products {
+    display: block;
+}
+
+.container__product {
+    display: flex;
+    width: 100%;
+    height: 62px;
+}
+
+
+.lable__table {
+    padding: 5px;
+    margin-left: 2px;
+
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 25px;
+}
+
+.lable__table:hover {
+    background-color: #5feb4c;
+}
+
+.input__table {
+    width: 180px;
+    height: 44px;
+
+    background: none;
+    text-align: right;
+
+    font-family: inherit;
+    font-size: 1.2rem;
+    color: #333;
+
+}
+
+.input__table.green {
+    background: greenyellow;
+}
+
+.selected-cell,
+.selected-row {
+    background-color: rgb(250, 250, 203);
+}
+
+
+/* Контейнер таблицы report*/
+.container__table__report {
+    position: relative; /* Относительное позиционирование для базы */
+    width: 770px;
+    height: 800px; /* Высота блока */
+    overflow-y: auto; /* Прокрутка по вертикали */
+    border: 1px solid #ccc;
+    margin-left: 10px;
+}
+
+
+/* Фиксация шапки */
+.container__table__report table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Первая строка шапки */
+.container__table__report thead tr:first-child th {
+  top: 0; /* Прилипает к самому верху */
+}
+
+/* Вторая строка шапки (прилипает под первой строкой) */
+.container__table__report thead tr:last-child th {
+  top: 46px; /* Высота первой строки (зависит от вашего шрифта/padding) */
+}
+
+.container__table__report th {
+    position: sticky;
+    top: 0;
+    text-align: center;
+    background-color: #f2f2f2; /* Обязательный фон */
+    z-index: 10; /* Шапка поверх контента */
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 1.4rem;
+    box-shadow: inset 0 -4px 0px rgba(0, 0, 0, 0.1); /* Тень снизу шапки */
+}
+
+.container__table__report   td {
+    word-wrap: break-word; /* Перенос длинных слов */
+    padding: 8px;
+
+    font-size: 1.4rem;
+  }
+
+.container__table__report tfoot {
+    position: sticky;
+    bottom: 0;
+    background-color: #f2f2f2; /* Чтобы текст не накладывался */
+}
+
+.container__table__report tfoot td {
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 10px;
+    box-shadow: inset 0 -4px 0px rgba(0, 0, 0, 0.1); /* Тень снизу шапки */
+}
+
+/* Контейнер таблицы */
+.container__table {
+    width: 770px;
+    height: 800px; /* Высота блока */
+    overflow-y: auto; /* Прокрутка по вертикали */
+    border: 1px solid #ccc;
+    margin-left: 10px;
+}
+
+/* Фиксация шапки */
+.container__table table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.container__table th {
+    position: sticky;
+    top: 0;
+    text-align: center;
+    background-color: #f2f2f2; /* Обязательный фон */
+    z-index: 2; /* Шапка поверх контента */
+    padding: 10px;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Тень для красоты */
+    box-shadow: inset 0 -4px 0px rgba(0, 0, 0, 0.1); /* Тень снизу шапки */
+}
+
+.container__table  th, td {
+    word-wrap: break-word; /* Перенос длинных слов */
+    border: 1px solid #ddd;
+    padding: 8px;
+
+    font-size: 1.4rem;
+  }
+
+.container__table tfoot {
+    position: sticky;
+    bottom: 0;
+    background-color: #f2f2f2; /* Чтобы текст не накладывался */
+}
+
+.container__table tfoot td {
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.tb__body td {
+    font-size: 14px;
+    border: 1px solid #ccc;
+    /* Общая граница для всех ячеек */
+    /* padding: 8px; Добавляет отступ внутри ячейки */
+    text-align: left;
+    /* Выравнивание текста в ячейках */
+}
+
+/* Делаем группу полей гибкой для одной строки */
+.input__unit {
+    display: flex;
+    margin-bottom: 5px;
+    align-items: center; /* Выравнивание по вертикали */
+    gap: 15px; /* Расстояние между label и input */
+}
+
+/* Задаем фиксированную ширину для label */
+.input__unit label {
+    width: 200px;
+    margin-left: 15px;
+    font-size: 1rem;
+}
+
+/* Задаем ширину для input */
+.input__unit input {
+    width: 550px; /* Фиксированная ширина */
+    padding: 8px;
+    box-sizing: border-box; /* Чтобы padding не увеличивал общую ширину */
+
+    border: 1px solid #ddd;
+    font-size: 1.4rem;
+}
+
+.input__btn {
+    width: 40px;
+    height: 42px;
+    box-sizing: border-box; /* Чтобы padding не увеличивал общую ширину */
+
+    border: 1px solid #ddd;
+    font-size: 1.4rem;
+}
+
+
+.table__sort {
+    position: relative;
+    margin-bottom: 5px;
+    align-items: center; /* Выравнивание по вертикали */
+    text-align: center;
+    padding-right: 10px;
+}
+
+.sort__down.table__sort::after {
+    content: "";
+    display: block;
+    border-style: solid;
+    border-width: 6px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+    pointer-events: none;
+
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    z-index: 1;
+}
+
+.sort__up.table__sort::after {
+    content: "";
+    display: block;
+    border-style: solid;
+    
+    border-width: 0 5px 6px 5px;
+    border-color:  transparent transparent #000 transparent;
+    pointer-events: none;
+
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    z-index: 1;
+}
+
+.text__red {
+    color: red;
+}
+
+.select__unit {
+    display: flex;
+    position: relative;
+    margin-bottom: 5px;
+    align-items: center; /* Выравнивание по вертикали */
+    gap: 15px; /* Расстояние между label и input */
+}
+
+.select__unit::after {
+    content: "";
+    display: block;
+    border-style: solid;
+    border-width: 6px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+    pointer-events: none;
+
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    z-index: 1;
+}
+
+.select__unit select {
+    width: 100%;
+    padding: .75rem 3rem .75rem 1rem;
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    appearance: none;
+
+    font-family: inherit;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.select__unit label {
+    margin-left: 15px;
+    width: 200px; /* Фиксированная ширина метки */
+    flex-shrink: 0; /* Запрещаем сжиматься метке */
+    font-size: 1rem;
+}
+
+.select__report {
+    display: flex;
+    position: relative;
+    /* margin-bottom: 5px; */
+    align-items: center; /* Выравнивание по вертикали */
+    gap: 15px; /* Расстояние между label и input */
+}
+
+.select__report::after {
+    content: "";
+    display: block;
+    border-style: solid;
+    border-width: 6px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+    pointer-events: none;
+
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    z-index: 1;
+}
+
+.select__report select {
+    width: 100%;
+    padding: .75rem 3rem .75rem 1rem;
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    appearance: none;
+
+    font-family: inherit;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.select__report label {
+    margin-left: 15px;
+    width: 140px; /* Фиксированная ширина метки */
+    flex-shrink: 0; /* Запрещаем сжиматься метке */
+    font-size: 1.2rem;
+}
+
+.locked__cell {
+    pointer-events: none;
+    opacity: 0.6; /* Визуальное затемнение */
+}
+
+.block__div {
+    pointer-events: none;
+    opacity: 0.9; /* Визуальное затемнение */
+}
+
+.input__find {
+    display: flex;
+    align-items: center; /* Выравнивание по вертикали */
+    gap: 15px; /* Расстояние между label и input */
+}
+
+.input__find label {
+    width: 50px;
+    font-size: 1rem;
+}
+
+/* Задаем ширину для input */
+.input__find input {
+    width: 400px; /* Фиксированная ширина */
+    padding: 8px;
+    box-sizing: border-box; /* Чтобы padding не увеличивал общую ширину */
+
+    border: 1px solid #ddd;
+    font-size: 1.4rem;
+}
+
+.command__btn {
+    display: flex;
+    align-items: center;      /* Выравнивает по вертикали */
+    justify-content: center;  /* Выравнивает по горизонтали */
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    background-color: #115343;
+    font-size: 1.2rem;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Эффекты при наведении и нажатии */
+.command__btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.command__btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Кнопки для коммандной панели */
+.image__btn__update {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+
+    /* Добавление иконки фоном */
+    background-image: url('../img/update.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 95%; /* Регулирует размер картинки в % */
+}
+
+.image__btn__add {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+
+    /* Добавление иконки фоном */
+    background-image: url('../img/add.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 95%; /* Регулирует размер картинки в % */
+}
+
+.image__btn__save {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    /* Добавление иконки фоном */
+    background-image: url('../img/save.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 95%; /* Регулирует размер картинки в % */
+}
+
+.image__btn__delete {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+
+    /* Добавление иконки фоном */
+    background-image: url('../img/delete_40623.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 95%; /* Регулирует размер картинки в % */
+}
+
+.lable__table,
+.image__btn__book {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    /* Добавление иконки фоном */
+    background-image: url('../img/book.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 95%; /* Регулирует размер картинки в % */
+}
+
+/* Эффекты при наведении и нажатии */
+.lable__table:hover,.image__btn__book:hover,.image__btn__delete:hover,
+.image__btn__add:hover,.image__btn__save:hover,
+.image__btn__update:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.lable__table:active,.image__btn__book:active,.image__btn__delete:active,
+.image__btn__add:active,.image__btn__save:active,
+.image__btn__update:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Класс для всплывающей подсказки */
+.tooltip {
+  position: fixed;
+  padding: 15px;
+  border: 1px dotted #b3b3b3;
+  border-radius: 8px;
+  text-align: center;
+  color: #fff;
+  background: black;
+  z-index: 100;
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+
+
+
+
+/* Стилизация всплывающего окна */
+#toast-container {
+    position: fixed; /* Фиксирует контейнер относительно окна браузера */
+    bottom: 20px;    /* Отступ снизу */
+    right: 20px;     /* Отступ справа */
+    z-index: 1000;   /* Чтобы сообщения были поверх всего */
+    display: flex;
+    flex-direction: column; /* Сообщения будут идти друг за другом по вертикали */
+    gap: 10px;
+}
+
+.toast {
+    background-color: #000;
+    color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0; /* Изначально скрыто */
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    min-width: 250px;
+    text-align: center;
+}
+
+.toast.show {
+    opacity: 1; /* Показываем при добавлении класса */
+    visibility: visible;
+}
+
+/* Форматирование checkbox */
+.checkbox_div {
+    position: relative;
+    display: flex;
+    align-items: center; /* Выравнивание по вертикали */
+
+}
+
+.checkbox_input {
+    appearance: none;
+    position: absolute;
+}
+
+.checkbox_label {
+    padding-left: 45px;
+    padding-right: 15px;
+    font-size: 1.2rem;
+    color: #444;
+    cursor: pointer;
+}
+
+.checkbox_label::before {
+    content: "";
+    display: block;
+    width: 32px;
+    height: 32px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+
+    position: absolute;
+    top: 14px;
+    left: 5px;
+    z-index: 1;
+
+}
+
+.checkbox_label::after {
+    content: "";
+    display: block;
+    width: 32px;
+    height: 32px;
+
+    background: url('../img/green_checcked.png');
+    /* background: #238107; */
+    border-radius: 5px;
+    background-size: 16px 16 px;
+    opacity: 0;
+
+    position: absolute;
+    top: 15px;
+    left: 6px;
+    z-index: 2;
+}
+
+.checkbox_input:checked + .checkbox_label::after {
+    opacity: 1;
+}
