@@ -3,6 +3,7 @@ const mainModule = require('./mainModule');
 const { text } = require('pdfkit');
 const { openSupply } = require('./myModule');
 const myModule = require('./myModule');
+const db = require('./db');
 
 
 let config = {
@@ -30,13 +31,12 @@ async function saveSupply(item) {
         if (!data.id) {
             await newSupplyId(data, conn)
             await newSupplyNumber(data, conn)
-            conn.execute(`INSERT INTO transactions (user,operation,document) VALUES ('${item.username}',2,${data.id}) `)
+            await db.query(`INSERT INTO transactions (user,operation,document) VALUES ('${item.username}',2,${data.id}) `)
             const nameProvider = await mainModule.getCounterparty(data.provider, conn)
             const nameTransport = await mainModule.getTransport(data.transport, conn)
             const dateSupply = mainModule.formatDateUa(new Date(data.date))
             const textNewMessage = "Нове Надходження № " + data.number + " від " + dateSupply + ", Постачальник: " + nameProvider + ", Транспорт: " + nameTransport
-            // console.log(textNewMessage)
-            conn.execute(`INSERT INTO messages (recipient, TEXT, sender) VALUES ('oleg', '${textNewMessage}', '${item.username}')`)
+            await myModule.sendMsg({recipient: 'oleg', text: textNewMessage, sender: item.username})
         }
         let bodySQL = ''
         bodySQL += (!data.ttn) ? ',TTN = null' : `,TTN = '${data.ttn}'`
@@ -46,9 +46,9 @@ async function saveSupply(item) {
         bodySQL += (!data.transport) ? ',Transport = null' : `,Transport = ${data.transport}`
 
         let strSQL = `UPDATE supply SET SupplyDate = '${data.date}', num='${data.number}' ${bodySQL} WHERE id=${data.id};`
-        await conn.execute(strSQL)
+        await db.query(strSQL)
         strSQL = `DELETE FROM supplys_nomenclature WHERE supply=${data.id};`
-        await conn.execute(strSQL)
+        await db.query(strSQL)
         // console.log(item.table)
         for (let i = 0; i < item.table.length; i++) {
             let strField = ''
@@ -217,7 +217,7 @@ module.exports = {
 
 async function newSupplyId(data, conn) {
     await conn.execute(`INSERT INTO supply (SupplyDate) VALUE ('${data.date}');`)
-    const [rows, fields] = await conn.execute(`SELECT id FROM supply ORDER BY id DESC LIMIT 1;`)
+    const [rows] = await db.query(`SELECT id FROM supply ORDER BY id DESC LIMIT 1;`)
     data.id = rows[0].id
     return data;
 }

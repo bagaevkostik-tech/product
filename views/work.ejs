@@ -16,6 +16,7 @@
         <div style="max-width:  800px;"><h1>Надходження та переробка жирової сировини</h1></div>
         <div class="work__btn" id="accounting" >Облік та звітність</div>
         <div class="container__user">
+            <div id="user-id" style="display: none;"><%= username %></div>
             <div class="user__name" id="user"></div>
             <div class="container__user__info" >
                 <div class="user__form__close">
@@ -24,7 +25,6 @@
                 <div class="user__exit__btn">Вихід</div>
             </div>
         </div>
-        
     </div>
     <!-- Картинки, навигация, интервал, сформувати -->
     <div class="container-header">
@@ -42,14 +42,18 @@
             <div class="foto" data-num="9"><img src="/img/screen1.jpg" alt="Фото  лого"></div>
             
         </div>
-        <!-- Командная панель интервал -->
+        <!-- Командная панель переключение таблиц, интервал -->
         <div>
-            <!-- кнопки перехода -->
+            <!-- кнопки перехода по таблицам-->
             <div class="tabs__nav">
-                <button class="tabs__nav-btn active" type="button" id="supplys-btn" data-tab="#tab_1" >Надходження</button>
-                <button class="tabs__nav-btn" type="button" id="recasts-btn" data-tab="#tab_2">Переробка</button>
-                <button class="tabs__nav-btn" type="button" id="list-supplys-btn" data-tab="#tab_3">Список надходжень</button>
-                <button class="tabs__nav-btn" type="button" id="list-recasts-btn" data-tab="#tab_4">Список переробок</button>
+                <button class="tabs__nav__btn active" type="button" id="supplys-btn" data-tab="#tab_1" >Надходження</button>
+                <button class="tabs__nav__btn" type="button" id="recasts-btn" data-tab="#tab_2">Переробка</button>
+                <button class="tabs__nav__btn" type="button" id="list-supplys-btn" data-tab="#tab_3">Список надходжень</button>
+                <button class="tabs__nav__btn" type="button" id="list-recasts-btn" data-tab="#tab_4">Список переробок</button>
+                <button class="tabs__nav__btn" type="button" id="messenger-btn" data-tab="#tab_5">
+                    <div class="flag__new__msg" id="flag-new-msg"></div>
+                    Повідомлення
+                </button>
             </div>
             <!-- даты начала и конца периода -->
             <div class="tabs__nav">
@@ -121,7 +125,7 @@
                     <tbody>
                     </tbody>
                     <tfoot>
-                            <tr style="background-color: #f2f2f2;">
+                            <tr >
                             <td  colspan="9" style="text-align: right; font-weight: bold;">Усього: </td>
                             <td  style="text-align: right; font-weight: bold;" id="table-supplys-sum-qty"></td>
                             <td  style="text-align: right; font-weight: bold;" id="table-supplys-sum-fat"></td>
@@ -133,6 +137,7 @@
         </div>
         <!-- Переработки -->
         <div class="tabs__item" id="tab_2">
+            <!-- Панель команд recast -->
             <div class="container-if">
                 <div class="work__btn" id="new-recast" >Нова переробка</div>
                 <div class="work__btn" id="open-recast" >Відкрити переробку</div>
@@ -175,7 +180,7 @@
                     </thead>
                     <tbody></tbody>
                     <tfoot>
-                        <tr style="background-color: #f2f2f2;">
+                        <tr >
                             <td  colspan="6" style="text-align: right; font-weight: bold;">Усього: </td>
                             <td  style="text-align: right; font-weight: bold;" id="table-recasts-sum-fat"></td>
                             <td  style="text-align: right; font-weight: bold;" id="table-recasts-sum-acid"></td>
@@ -204,6 +209,20 @@
             <div class="table-container">
                 <table id="table-recasts-list"></table>
             </div>
+        </div>
+        <!-- Мессенжер -->
+        <div class="tabs__item" id="tab_5">
+            <!-- Панель команд messenger -->
+            <div class="container-if">
+                <div class="work__btn" id="all-msg-read">Прочитати всі повідомлення</div>
+                <div class="work__btn" style="display: none;" id="msg-update">Оновити повідомлення</div>
+            </div>
+            <!-- Таблица повідомлень -->
+                <div class="container__table__messenger">
+                <table class="table__messenger" id="table-messenger">
+                    <tbody></tbody>
+                </table>
+                </div>
         </div>
     </div>
     <!-- Моддальнное - интервал -->
@@ -292,6 +311,8 @@
     <!-- Сюда будут добавляться сообщения -->
     </div>
 
+    <!-- Подключаем клиентскую библиотеку Socket.io (автоматически раздается сервером) -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/js/air-datepicker.js"></script>
     <script src="/js/work.js"></script>
     <script src="/js/interval.js"></script>

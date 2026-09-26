@@ -2,6 +2,8 @@ const { text } = require('body-parser');
 const mysql = require('mysql2/promise')
 const mainModule = require('./mainModule');
 const { name } = require('xlsx-populate/lib/RichTextFragment');
+const db = require('./db');
+const socketStorage = require('./socket');
 
 let config = {
     host: 'localhost',
@@ -120,8 +122,6 @@ async function reqDirectoryProducts(conn) {
     }
 }
 
-
-
 async function getSupplyData(s, conn) {
     const [rows, fields] = await conn.execute(`SELECT * FROM supply WHERE id = ${s};`)
     return (rows) ? rows : ''
@@ -131,7 +131,6 @@ async function getNomenclature(n, conn) {
     const [rows, fields] = await conn.execute(`SELECT name FROM nomenclatures WHERE id = ${n};`)
     return (rows[0]) ? rows[0].name : ''
 }
-
 
 async function saveQuickList(item, conn, username) {
     const data = item.quickList
@@ -305,7 +304,6 @@ async function saveProduct(item) {
 
 }
 
-
 async function openTransport(data) {
     // console.log(data)
     try {
@@ -465,6 +463,37 @@ ORDER BY tbl.SupplyDate, tbl.num;
     }
 }
 
+async function saveErrorToDB(data) {
+    // console.log(data)
+    const conn = await mysql.createConnection(config)
+
+    const sql = 'INSERT INTO messages (recipient, TEXT, sender) VALUES (?, ?, ?)';
+    try {
+        await conn.execute(sql, ['kostya', data, 'admin']);
+        conn.end()
+        console.log('Ошибка успешно сохранена в базу данных');
+    } catch (error) {
+        console.error('Не удалось сохранить ошибку в БД:', error.message);
+    }
+}
+
+async function sendMsg(data) {
+    const sql = 'INSERT INTO messages (recipient, TEXT, sender) VALUES (?, ?, ?)';
+    // const sql2 = 'SELECT * FROM messages WHERE recipient = ? AND TEXT = ? AND sender = ? ORDER BY time_creation DESC'
+    try {
+        await db.query(sql, [data.recipient, data.text, data.sender]);
+        const io = socketStorage.getIO();
+        // const [rows] = await db.query(sql2, [data.recipient, data.text, data.sender])
+        io.to(data.recipient).emit('received_message', data);
+        // io.to(data.sender).emit('received_message', rows[0] );
+        
+        console.log('Успешно сохранено сообщение в базу данных');
+    } catch (error) {
+        console.error('Не удалось сообщение!');
+    }
+}
+
+
 // Экспортируем функцию
 module.exports = {
     zeroRecastParam: zeroRecastParam,
@@ -480,7 +509,9 @@ module.exports = {
     saveQuickList: saveQuickList,
     initializationAccounting: initializationAccounting,
     turnoverBalance: turnoverBalance,
-    deleteDirectoryItemCounterparty: deleteDirectoryItemCounterparty    
+    deleteDirectoryItemCounterparty: deleteDirectoryItemCounterparty,
+    saveErrorToDB,
+    sendMsg
 };
 
 

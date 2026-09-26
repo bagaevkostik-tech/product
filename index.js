@@ -1,4 +1,5 @@
 const express = require('express')
+const http = require('http');
 const mysql = require('mysql2/promise')
 const respon = require('./JS/respon')
 const path = require('path');
@@ -7,14 +8,23 @@ const myModule = require('./JS/myModule');
 const printModule = require('./JS/printModule');
 const recastModule = require('./JS/recastModule');
 const supplyModule = require('./JS/supplyModule');
+const messengerModule = require('./JS/messengerModule');
 const { text } = require('body-parser');
 const { log } = require('console');
+// const { Server } = require('socket.io');
+const socketStorage = require('./JS/socket'); // Путь к вашему файлу socket.js
 let validation = true //Валидация клиента
 let arrValidation = []
 
 //console.log(new Date())
 const app = express()
+const server = http.createServer(app); // Создаем HTTP-сервер на базе Express
+// const io = new Server(server);         // Инициализируем Socket.io
 
+// Инициализируем socket.io
+const io = socketStorage.init(server);
+
+// Раздача статических файлов (например, клиентской части из папки public)
 app.use(express.static('public'))
 app.use(express.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
@@ -298,6 +308,53 @@ app.post('/users/post/5', async (req, res) => {
     res.status(200).set('Content-Type', 'text/plain').send('This is GET query');
   }
 });
+
+//Запросы Мессанжера
+app.post('/users/post/6', async (req, res) => {
+  if (req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk });
+
+    req.on('end', async () => {
+      const dataUser = getValidationData(req.ip)
+      if (!dataUser) {
+        res.status(401).set('Content-Type', 'text/plain').send('Invalid vaid client');
+        return;
+      }
+
+      try {
+        const data = JSON.parse(body);
+        data.username = dataUser.username
+        data.userpass = dataUser.userpass
+
+        if (data.text === 'messenger') {
+          const resDatas = await messengerModule.messenger(data)
+          res.status(200).json(resDatas);
+        }
+
+        if (data.text === 'reportDLVD') {
+          const resDatas = await messengerModule.reportDLVD(data)
+          res.status(200).json(resDatas);
+        }
+
+        if (data.text === 'reporReadMsg') {
+          const resDatas = await messengerModule.reporReadMsg(data)
+          res.status(200).json(resDatas);
+        }
+
+        if (data.text === 'newMsg') {
+          const resDatas = await messengerModule.newMsg(data)
+          res.status(200).json(resDatas);
+        }
+
+      } catch (error) {
+        res.status(400).set('Content-Type', 'text/plain').send(error);
+      }
+    });
+  } else {
+    res.status(200).set('Content-Type', 'text/plain').send('This is GET query');
+  }
+});  
 
 //Запросы на сохранение поставки
 app.post('/users/post/10', async (req, res) => {
@@ -602,6 +659,7 @@ app.post('/users/post/17', async (req, res) => {
   }
 });
 
+
 //Добавляем в массив пользоватеоей нового
 function validationList(ip, username, userpass) {
   if (arrValidation.length !== 0) {
@@ -638,15 +696,39 @@ function monitorUsersTime() {
   setTimeout(() => {
     monitorUsersTime()
   }, 5 * 60 * 1000);
-
-  //console.log(arrValidation)
 }
 
 monitorUsersTime()
 
+// Обработка подключения клиента
+io.on('connection', (socket) => {
+  // console.log('Новое соединение с клиентом:', socket.id);
+  // Допустим, при подключении клиент передает свой userId (из сессии или токена)
+  const userId = socket.handshake.auth.userId; 
+  if (userId) {
+    // Добавляем сокет в комнату, равную вашему ID
+    socket.join(userId);
+    console.log(`Клиент с socket.id ${socket.id} привязан к кастомному ID: ${userId}`);
+  }
+  
+  // Отключение клиента
+  socket.on('disconnect', () => {
+    console.log('Клиент отключился:', socket.id);
+  });
+});
+
+// function ioSendMsg(data) {
+//   io.to(data.recipient).emit('personal_message', { text: data });
+// }
+
+// module.exports = {ioSendMsg};
+
 const PORT = 3000
 
-app.listen(PORT, () => {
-  console.log(`Server started: http://localhost:${PORT}`)
-})
+// app.listen(PORT, () => {
+//   console.log(`Server started: http://localhost:${PORT}`)
+// })
 
+server.listen(PORT, () => {
+  console.log(`Сервер запущен на http://localhost:${PORT}`);
+});

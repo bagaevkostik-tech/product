@@ -5,7 +5,7 @@ const format1 = new Intl.NumberFormat('uk-UA', {
     minimumFractionDigits: 1 // Принудительно добавит два знака после запятой
 });
 
-const tableBtn = document.querySelectorAll(".tabs__nav-btn");
+const tableBtn = document.querySelectorAll(".tabs__nav__btn");
 const tabsItems = document.querySelectorAll(".tabs__item");
 const btnRequest = document.querySelector('#btnRequest')
 const tableSupplys = document.getElementById('table-supplys')
@@ -18,11 +18,46 @@ const sortSupply = document.getElementById('sortSupply'); // Флажок на �
 const sortRecast = document.getElementById('sortRecast'); // Флажок на сортировку
 const tableSupplysList = document.getElementById('table-supplys-list')
 const tableRecastsList = document.getElementById('table-recasts-list')
+const tableMessenger = document.getElementById('table-messenger')
+const tbodyMessenger = tableMessenger.querySelector('tbody')
+const containerTableMessenger = document.querySelector('.container__table__messenger')
+const userID = document.getElementById('user-id').textContent
 
+const btnMsg = document.getElementById('flag-new-msg')
+const formatter = new Intl.DateTimeFormat('uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+});
+
+let arrMessenges = []
 let arrSupplys = []
 let arrRecasts = []
 let activeCellSupplys = null
 let activeCellRecast = null
+let lastDateMsg
+
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    // Проверяем, появилась ли строка на экране
+    if (entry.isIntersecting) {
+
+        // console.log('Строка выведена на экран:', entry.target.dataset.id);
+            
+        // Действие: например, подгрузить данные или добавить класс
+        entry.target.classList.remove('msg__unread'); 
+        flagNewMsg()
+        reqReporReadMsg(entry.target.dataset.id)
+        // Если событие нужно отследить только один раз, прекращаем наблюдение:
+        observer.unobserve(entry.target);
+    }
+  });
+}, {
+  root: null, // null означает отслеживание относительно экрана (viewport)
+  threshold: 1 // Сработает, когда 100% строки покажется на экране
+});
+
 // Создаем событие двойного клика
 const eventDbclick = new MouseEvent('dblclick', {
     bubbles: true,
@@ -449,7 +484,7 @@ function findRowSelectRecast() {
 
 //Нажатие кнопки Сформировать
 function clickGetRequest(event) {
-    let elementTabs = document.querySelector('.tabs__nav-btn.active');
+    let elementTabs = document.querySelector('.tabs__nav__btn.active');
     let idValue = elementTabs.id; // Вернет значение ID, если оно есть
     if (idValue === 'supplys-btn') {
         reqSupplys()
@@ -605,7 +640,84 @@ function reqRecastsList() {
     })
 }
 
+//Запрос данных Messenger
+function reqMessenger() {
+    sendData(`http://${getAddress()}/users/post/6`, JSON.stringify({
+        text: 'messenger',
+    })).then((data) => {
+        if (!data.result) {
+            toast(data.text)
+        } else {
+            arrMessenges = data.messages
+            fillTableMessenger()
+            const deliveredMsg = arrMessenges.filter(item => !item.delivered)
+            if (deliveredMsg.length) {
+                reqReportDLVD(deliveredMsg)
+            }
+        }
+    })
+}
 
+//Запрос о подтверждении доставки
+function reqReportDLVD(data) {
+    const listMsg = []
+    data.forEach(item => {
+        listMsg.push(item.id)
+    })
+    sendData(`http://${getAddress()}/users/post/6`, JSON.stringify({
+        text: 'reportDLVD',
+        messeeges: listMsg
+    })).then((data) => {
+        if (!data.result) {
+            toast(data.text)
+        } else {
+            arrMessenges.forEach(item => {
+                if(!item.delivered) item.delivered = 1
+            })
+            // console.log('Звіт про доставку виконано вдало!')
+        }
+    })
+}
+
+//Запрос о подтверждении  прочтения сообщения
+function reqReporReadMsg(data) {
+    // const listMsg = []
+    // data.forEach(item => {
+    //     listMsg.push(item.id)
+    // })
+    sendData(`http://${getAddress()}/users/post/6`, JSON.stringify({
+        text: 'reporReadMsg',
+        messeeges: data
+    })).then((data) => {
+        if (!data.result) {
+            toast(data.text)
+        } else {
+            // console.log('Звіт про читання повідомлення виконано вдало!')
+        }
+    })
+}
+
+//Запрос новых сообщенний
+function reqNewMsg() {
+    sendData(`http://${getAddress()}/users/post/6`, JSON.stringify({
+        text: 'newMsg'
+    })).then((data) => {
+        if (!data.result) {
+            toast(data.text)
+        } else {
+            if(data.table.length) {
+                const html = insertRowsTableMsg(data.table)
+                tbodyMessenger.insertAdjacentHTML('beforeend', html);
+                // 2. Находим нужную строку (или все строки) и включаем наблюдение
+                // html.forEach(row => console.log(row));
+                tableMessenger.querySelectorAll('tr.msg__unread').forEach(row => observer.observe(row));
+                reqReportDLVD(data.table)
+                flagNewMsg()
+            }
+            // console.log('Запит нових повідомлень виконано вдало! кількість: ', data.table.length)
+        }
+    })
+}
 
 // ***************** Сортировка таблиц по клику на шапке ************************
 function sortTable(index, header, tableID) {
@@ -912,6 +1024,103 @@ function fillRecastsList(main, data) {
 
 }
 
+//Заполнение Мессенджера
+function fillTableMessenger() {
+    tbodyMessenger.innerHTML =''
+    const html = insertRowsTableMsg(arrMessenges)
+    tbodyMessenger.insertAdjacentHTML('beforeend', html);
+    // 2. Находим нужную строку (или все строки) и включаем наблюдение
+    tableMessenger.querySelectorAll('tr.msg__unread').forEach(row => observer.observe(row));
+    flagNewMsg()
+        
+}
+
+function insertRowsTableMsg(arrRows) {
+    let html = ''
+    // console.log(arrMessenges)
+    arrRows.forEach(row => {
+        let nameClass = 'msg__container'
+        let nameClassTR = ''
+        if (!row.read_msg) nameClassTR = 'msg__unread'
+        const date = new Date(row.time_creation)
+        const time = date.toLocaleTimeString('ru-RU', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+            });
+        if (formatter.format(date) !== lastDateMsg) {
+            html += `
+            <tr>
+                <td style="text-align: center;border: none;">${formatter.format(date)}</td>
+            </tr>
+            `
+            lastDateMsg = formatter.format(date)
+        }
+        html += `
+        <tr class = "${nameClassTR}" data-id = "${row.id}"><td style="border: none;">
+            <div class = "${nameClass}">
+                <div class="msg__text">${row.text}</div>
+                <div class="msg__time">${time}</div>
+            </div>
+        </td></tr>
+        `
+    })
+    return(html)
+}
+
+function goToRowFirstUnRead(){
+    // const foundRow = arrMessenges.find(item => !item.read_msg)
+    const selectedRow = tableMessenger.querySelector('tr.msg__unread')
+        // console.log(selectedRow)
+    if (!selectedRow) {
+        containerTableMessenger.scrollTop = containerTableMessenger.scrollHeight
+    } else {
+        selectedRow.scrollIntoView({ behavior: 'auto', block: 'end' });
+        // Вычисляем позицию строки относительно верха контейнера
+        const rowHeight = selectedRow.offsetHeight;
+        // Прокручиваем вниз на 50% row от текущего места с плавной анимацией
+        containerTableMessenger.scrollBy({
+            top: (rowHeight / 2) * -1,
+            behavior: 'auto' // 'smooth' для плавной прокрутки, 'auto' для мгновенной
+        });
+        // console.log(selectedRow)
+    }
+}
+
+function flagNewMsg() {
+    const count = tableMessenger.querySelectorAll('tr.msg__unread').length
+    if (count) {
+        btnMsg.classList.add('active')
+        btnMsg.textContent = (count < 1000) ? count : '\u221E'
+    } else {
+        btnMsg.classList.remove('active')
+        btnMsg.textContent = ''
+    }
+    // console.log(count)
+}
+
+document.getElementById('all-msg-read').addEventListener('click', () => {
+    const rowSelect = tableMessenger.querySelectorAll('tr.msg__unread')
+    const listMsg = []
+    if (!rowSelect.length) return
+    rowSelect.forEach(item => {
+        item.classList.remove('msg__unread')
+        listMsg.push(item.dataset.id)
+    })
+    goToRowFirstUnRead()
+    // Останавливает отслеживание всех элементов сразу
+    observer.disconnect();
+    flagNewMsg()
+    reqReporReadMsg(listMsg)
+    
+
+    // console.log(listMsg)
+})
+
+document.getElementById('msg-update').addEventListener('click', () => {
+    reqMessenger()
+    goToRowFirstUnRead()    
+})
+
 //Запрос на получене данных пользователя
 function initialization() {
     sendData(`http://${getAddress()}/users/post/1`, JSON.stringify({
@@ -921,11 +1130,11 @@ function initialization() {
             toast(data.text)
         } else {
             document.getElementById('user').textContent = data.name
+            reqMessenger()
+
         }
     })
 }
-
-
 
 function clearTable() {
     clearTableSupplus()
@@ -1043,6 +1252,7 @@ tableBtn.forEach(function (item) {
 
         currentBtn.classList.add('active')
         currentTab.classList.add('active')
+        if (tabId === '#tab_5') goToRowFirstUnRead()
     });
 });
 
@@ -1199,6 +1409,24 @@ function tableSelectCell(table, event) {
 
 initialization()
 
+// Подключаемся к серверу и передаем свой ID
+// const socket = io("http://192.168.1.27:3000", {
+const socket = io(getAddress(), {
+  auth: {
+    userId: userID
+  }
+});
+
+
+socket.on('connect', () => {
+    console.log('Успешно подключено к серверу ID:', socket.id);
+});
+
+socket.on('received_message', (data) => {
+    reqNewMsg()
+  console.log('Новое сообщение:', data);
+});
+
 // Всплывающее сообщение
 function toast(message) {
     const toastContainer = document.getElementById('toast-container');
@@ -1314,3 +1542,4 @@ document.onmouseout = (e) => {
         tooltipElem = null
     }
 }
+

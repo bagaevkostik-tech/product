@@ -65,6 +65,7 @@ let arrTurnover = []
 let arrReport = []
 let numberRow  = 0
 
+
 //Сортировка в таблицах
 function sortTable(index, header, tableID) {
     const table = document.getElementById(`${tableID}`);
@@ -193,6 +194,12 @@ tableTransports.addEventListener('click', (event) => {
         setUnitTransport(unit)
     }
 })
+
+// Выделение выбранной строки таблицы отчетов
+tableReport.addEventListener('click', (event) => {
+    selectedCell(event, tableReport)
+})
+
 
 // Выделение выбранной строки таблицы product
 tableProducts.addEventListener('click', (event) => {
@@ -910,6 +917,7 @@ function fillTableReport() {
     })        
     tbodyReport.insertAdjacentHTML('beforeend', html);
 }
+
 
 initialization()
 

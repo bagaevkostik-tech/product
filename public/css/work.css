@@ -181,7 +181,7 @@ tr.active {
 }
 
 .even-num-tr {
-    background-color: #f8f8f8;
+    background-color: #d9d9d9;
 }
 
 /* Оформление перемещений по таблице */
@@ -210,7 +210,7 @@ tr.active {
 .table-container th {
     position: sticky;
     top: 0;
-    background-color: #f2f2f2; /* Обязательный фон */
+    background-color: #d0d0d0; /* Обязательный фон */
     z-index: 1; /* Шапка поверх контента */
     padding: 10px;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Тень для красоты */
@@ -239,9 +239,10 @@ tfoot {
     background-color: #f2f2f2; /* Чтобы текст не накладывался */
 }
 
-.table-container  tfoot {
+.table-container  tfoot tr {
     font-size: 22px;
     font-weight: bold;
+  background-color: #d0d0d0; /* Цвет фона для ячеек-заголовков */
 }
 
 .row__convers {
@@ -300,24 +301,23 @@ div {
     width: 40px;
 }
 
-.tabs__nav-btn {
+.tabs__nav__btn {
     padding: 15px 30px;
     font-size: 20px;
     border: 0;
     cursor: pointer;
 }
 
-.tabs__nav-btn:hover {
+.tabs__nav__btn:hover {
     background-color: #5feb4c;
 }
 
-.tabs__nav-btn.active {background-color: #d1ecf1; outline: none; border: 2px solid #0056b3;}
-    /* background-color: #5e3ddf;
-    border-right-color: #5e3ddf;
-    color: #fff;
+.tabs__nav__btn.active {
+    background-color: #d1ecf1;
+    outline: none;
+    border: 2px solid #0056b3;
+    border-radius: 10px;
 }
- */
-
 
 
 .tabs__item {
@@ -699,4 +699,74 @@ div {
     top: 50%;
     right: 2px;
     z-index: 1;
+}
+/* Контейнер таблицы messenger*/
+.container__table__messenger {
+    position: relative; /* Относительное позиционирование для базы */
+    width: 1400px;
+    max-height: 550px; /* Высота блока */
+    overflow-y: auto; /* Прокрутка по вертикали */
+    border: 1px solid #ccc;
+    margin-left: 10px;
+}
+
+
+.table__messenger {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table__messenger tr, td {
+    word-wrap: break-word; /* Перенос длинных слов */
+    padding: 8px;
+    font-size: 1.4rem;
+    border: none;
+}
+
+.msg__container {
+    display: flex;
+    flex-direction: column;
+    width: 1000px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+tr.msg__unread td {
+    background-color: #d9d9d9;
+}
+
+.msg__text {
+    font-size: 1.8rem;
+    padding: 8px;
+
+}
+
+.msg__time {
+    /* justify-content: flex-end; */
+    margin-left: 90%;
+    width: 100px;
+    padding: 5px;
+}
+
+#messenger-btn {
+    position: relative; /* Задает точку отсчета для дочернего круга */
+}
+
+/* Кружок в углу */
+.flag__new__msg {
+    display: none;
+}
+
+.flag__new__msg.active {
+  position: absolute; /* Вырывает кружок из потока и привязывает к .box */
+  display: flex;
+  top: -5px;        /* Положение сверху (отрицательное значение выведет за край) */
+  right: -5px;      /* Положение справа */
+  width: 40px;
+  height: 40px;
+  background-color: #ff0;
+  border-radius: 50%; /* Превращает квадрат в круг */
+  color: #000;
+  justify-content: center; /* по горизонтали */
+  align-items: center;     /* по вертикали */
 }
