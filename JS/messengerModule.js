@@ -1,7 +1,8 @@
 const mysql = require('mysql2/promise')
 const mainModule = require('./mainModule');
 const myModule = require('./myModule');
-const util = require('util');
+const db = require('./db');
+const util = require('util'); // Преобразование информации об ошибке в чисто текст
 
 let config = {
     host: 'localhost',
@@ -14,14 +15,10 @@ let config = {
 async function messenger(data) {
     try {
         const reqName = await myModule.reqUser(data)
-        config.user = data.username
-        config.password = data.userpass
-        const conn = await mysql.createConnection(config)
         const strSQL = `
-SELECT * FROM messages WHERE recipient = '${data.username}' ORDER BY time_creation;
+SELECT * FROM messages WHERE recipient = ? ORDER BY time_creation;
         `
-        const [messages, fields] = await conn.execute(strSQL)
-        conn.end()
+        const [messages] = await db.query(strSQL,[data.username])
         return {result: true, name: reqName.name, userID: data.username, messages: messages}
     } catch (error) {
         console.log('Error', error)

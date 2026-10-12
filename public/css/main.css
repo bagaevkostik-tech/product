@@ -1,24 +1,36 @@
 * {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
-body  {
-    margin: 100px;
-    text-align: center;
-    background: #e4e6e6;
+
+/* Растягиваем body на весь экран */
+body {
+  margin: 0;
+  height: 100vh; /* 100% высоты экрана */
+  display: flex;
+  justify-content: center; /* Центр по горизонтали */
+  align-items: center;     /* Центр по вертикали */
+  background: #e4e6e6;
 }
 
+/* Ваш контейнер */
 .container {
-    display: block;
-    background: rgb(246, 241, 241);
-    text-align: center;
-    margin-left: 300px;
-    margin-right: 300px;
-    padding: 100px;
+  display: flex;
+  justify-content: center; /* Центрирование по горизонтали */
+  align-items: center;
+  flex-direction: column; /* Элементы идут в колонку */
+  gap: 10px;           /* Расстояние между элементами */
+  width: 80%;          /* На мобильных займет почти всю ширину */
+  max-width: 600px;    /* На компьютерах не станет слишком большим */
+  padding: 20px;
+  background: rgb(246, 241, 241);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
 
-    border: 1px solid black;
-    border-radius: 15px;
+form {
+    text-align: center;
 }
 
 button {
@@ -41,4 +53,11 @@ input,button {
 
 button:hover {
     background: greenyellow;
+}
+
+/* Стили для мобильных экранов (шириной до 768px) */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; /* Выстраиваем элементы вертикально */
+  }
 }

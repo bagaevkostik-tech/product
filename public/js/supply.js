@@ -88,16 +88,22 @@ document.getElementById('edit-number-btn').addEventListener('click', () => numbe
 //Завершение редактирования номера поставки
 numberSupply.addEventListener('change', () => numberSupply.readOnly = true)
 
-// Получение днных для фильтрации таблицы
+// Получение днных для фильтрации таблицы контрагенты
 counterparty.addEventListener('input', () => {
     const text = counterparty.value
-    if (text) { fillTableCounterpaties(text) } else { fillTableCounterpaties() }
+    if (text) {
+        fillTableCounterpaties(text)
+        highlightTextInTable( tableCounterparties, text)
+    } else { fillTableCounterpaties() }
 })
 
-// Получение днных для фильтрации таблицы
+// Получение днных для фильтрации таблицы транспорт
 transport.addEventListener('input', () => {
     const text = transport.value
-    if (text) { fillTableTtansports(text) } else { fillTableTtansports() }
+    if (text) {
+        fillTableTtansports(text)
+        highlightTextInTable(tableTransports, text)
+    } else { fillTableTtansports() }
 })
 
 document.getElementById('counterparties-btn').addEventListener('click', () => {
@@ -136,6 +142,7 @@ document.querySelector('#transports-btn').addEventListener('click', () => {
     fillTableTtansports()
     document.getElementById('transports').classList.add('open')
 })
+
 // Закрытие модальных окон
 backdrop.forEach((item) => {
     item.addEventListener("click", () => modal.forEach((item) => { item.classList.remove('open') }));
@@ -1202,4 +1209,25 @@ document.onmouseout = (e) => {
         tooltipElem.remove()
         tooltipElem = null
     }
+}
+
+// Выделение фрагмента поиска в таблице
+function highlightTextInTable(table, searchText) {
+    if (!table || !searchText) return;
+
+    // Создаем регулярное выражение для поиска (без учета регистра и глобально)
+    const regex = new RegExp(`(${searchText})`, 'gi');
+    
+    const tbody = table.querySelector('tbody')
+
+    // Находим все ячейки в таблице
+    const cells = tbody.querySelectorAll('td');
+
+    cells.forEach(cell => {
+        // Проверяем, содержит ли ячейка искомый текст
+        if (cell.textContent.toLowerCase().includes(searchText.toLowerCase())) {
+            // Заменяем текст внутри ячейки с сохранением HTML-структуры, если она простая
+            cell.innerHTML = cell.innerHTML.replace(regex, '<mark style="background-color: yellow;">\$1</mark>');
+        }
+    });
 }

@@ -1,6 +1,9 @@
+const db = require('./db');
 const mysql = require('mysql2/promise')
 const mainModule = require('./mainModule');
 const { text } = require('pdfkit');
+const myModule = require('./myModule');
+const util = require('util'); // Преобразование информации об ошибке в чисто текст
 
 
 let config = {
@@ -121,7 +124,7 @@ async function sopplysForRecast (data) {
                 else {rows[i].providerName = ''}
                 if (rows[i].transportID) rows[i].transportName = await mainModule.getTransport(rows[i].transportID, conn)
                     else {rows[i].transportName = ''}
-                if (rows[i].productID) rows[i].productName = await mainModule.getNomenclature(rows[i].productID, conn)
+                if (rows[i].productID) rows[i].productName = await getNomenclature(rows[i].productID)
                 if (!rows[i].pctProvider) rows[i].pctProvider = ''
                 if (!rows[i].pctLAB) rows[i].pctLAB = ''
                 if (!rows[i].fat) rows[i].fat = ''
@@ -346,11 +349,16 @@ async function openRecast(data) {
         return { result: false, text: 'Помилка завантаження!'}
     }
 }
-async function reqSamples(conn) {
-    const [rows, fields] = await conn.execute(`
-        SELECT id, name, acid, sodium, foamy FROM sample;
-    `)
-    return rows
+async function reqSamples() {
+    try {
+        const [rows] = await db.query(`SELECT id, name, acid, sodium, foamy FROM sample;`)
+        const result = rows
+        return result;
+    } catch (error) {
+        const textError = 'Ошибка выполнения запроса по типовым операциям переработки:\n' + util.inspect(error, { showHidden: false, depth: null });
+        await myModule.saveErrorToDB(textError)
+        return false
+    }
 }
 
 async function getSamples(data) {
@@ -358,7 +366,7 @@ async function getSamples(data) {
     config.password = data.userpass
     try {
         const conn = await mysql.createConnection(config)
-        const table = await reqSamples(conn)
+        const table = await reqSamples()
         conn.end()
         return {result: true, table: table};
     } catch (error) {
@@ -376,7 +384,7 @@ async function removeSample (data) {
         const strSQL = `DELETE FROM sample WHERE id = ${data.id};`
         await conn.execute(strSQL)
 
-        const table = await reqSamples(conn)
+        const table = await reqSamples()
         const result = {result: true, table: table}
         conn.end()
         return result;
@@ -398,7 +406,7 @@ async function saveSample(data) {
             data.id = row[0].id
         }
         await conn.execute(`UPDATE sample SET name='${data.name}', acid = ${data.acid}, sodium = ${data.sodium}, foamy = ${data.foamy} WHERE id=${data.id};`)
-        const table = await reqSamples(conn)
+        const table = await reqSamples()
 
         conn.end()
         data.result = true
@@ -417,6 +425,7 @@ module.exports = {
     auditSupplys: auditSupplys,
     saveConversion: saveConversion,
     deleteRowRecast: deleteRowRecast,
+    reqSamples: reqSamples,
     openRecast: openRecast,
     queryRecastsList: queryRecastsList,
     getSamples: getSamples,
@@ -476,4 +485,15 @@ async function auditNumber(data, conn) {
     if (rows.length === 0 || rows[0].id === data.id) result = true
     if (rows.length > 1) result = false
     return result;
+}
+
+async function getNomenclature(n) {
+    try {
+        const [rows] = await db.query(`SELECT name FROM nomenclatures WHERE id = ${n};`)
+        return (rows[0]) ? rows[0].name : ''
+    } catch (error) {
+        const textError = 'Ошибка выполнения запроса наименование Номенклатуры:\n' + util.inspect(error, { showHidden: false, depth: null });
+        await saveErrorToDB(textError)
+        return false
+    }
 }

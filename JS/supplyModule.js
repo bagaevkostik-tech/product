@@ -4,6 +4,7 @@ const { text } = require('pdfkit');
 const { openSupply } = require('./myModule');
 const myModule = require('./myModule');
 const db = require('./db');
+const util = require('util'); // Преобразование информации об ошибке в чисто текст
 
 
 let config = {
@@ -27,7 +28,7 @@ async function saveSupply(item) {
         }
         // console.log(item.quickList)
 
-        await myModule.saveQuickList(item, conn, item.username)
+        await saveQuickList(item,  item.username)
         if (!data.id) {
             await newSupplyId(data, conn)
             await newSupplyNumber(data, conn)
@@ -88,16 +89,12 @@ async function saveSupply(item) {
     }
 }
 
-async function supplys(params) {
-    config.user = params.username
-    config.password = params.userpass
-    const conn = await mysql.createConnection(config) 
-    const result  = await querySupplys(params, conn)
-    conn.end()
-    return result
-}
+// async function supplys(params) {
+//     const result  = await querySupplys(params)
+//     return result
+// }
 
-async function querySupplys(data, conn) {
+async function querySupplys(data) {
     try {
         let sort = 'DESC'
         if (data.sort) sort = ''
@@ -120,7 +117,7 @@ transports AS tbl5 ON  tbl2.Transport = tbl5.ID
 WHERE tbl2.SupplyDate BETWEEN '${data.dateStart}' AND '${data.dateFinish}'
 ORDER BY tbl2.SupplyDate ${sort}, tbl2.num ${sort};
 `
-        const [rows, fields] = await conn.execute(strSQL)
+        const [rows] = await db.query(strSQL)
         return {result: true, table: rows};
     } catch (error) {
         console.log('Error', error)
@@ -212,7 +209,8 @@ module.exports = {
     zeroSupplyParam: zeroSupplyParam,
     querySupplysList: querySupplysList,
     querySupply: querySupply,
-    supplys: supplys    
+    // supplys: supplys,
+    querySupplys
 }    
 
 async function newSupplyId(data, conn) {
@@ -244,4 +242,33 @@ async function auditNumber(data, conn) {
     if (rows.length === 0 || rows[0].id === data.id) result = true
     if (rows.length > 1) result = false
     return result;
+}
+
+async function saveQuickList(item, username) {
+    const data = item.quickList
+    const arrProvider = item.arrQuickProviders
+    await db.query(`DELETE FROM quick_list WHERE id_user='${username}';`)
+    let p = 1
+    let c = 1
+    let t = 1
+    let n = 1
+    for (i = 0; i < data.length; i++) {
+        if (data[i].type === 'Provider' && p <= 7) {
+            await db.query(`INSERT INTO quick_list (id_user,name_type,num,id_value) VALUES ('${username}','Provider',${p},${data[i].id});`)
+            p++
+        }
+        if (data[i].type === 'Carrier' && c <= 7) {
+            await db.query(`INSERT INTO quick_list (id_user,name_type,num,id_value) VALUES ('${username}','Carrier',${c},${data[i].id});`)
+            c++
+        }
+        if (data[i].type === 'Transport' && t <= 7) {
+            await db.query(`INSERT INTO quick_list (id_user,name_type,num,id_value) 
+                VALUES ('${username}','Transport',${t},${data[i].id});`)
+            t++
+        }
+        if(data[i].type === 'Nomenclature' && n <= 7) {
+            await db.query(`INSERT INTO quick_list (id_user,name_type,num,id_value) VALUES ('${username}','Nomenclature',${n},${data[i].id});`)
+            n ++
+        }
+    }
 }

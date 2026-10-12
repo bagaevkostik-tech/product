@@ -37,7 +37,7 @@
             <div class="container__tab" id="tab_1" >
                 <!-- Командная панель -->
                 <div class="countainer__commands">
-                    <div class="image__btn__update" id="report-update" data-tooltip="Оновити дані звіту" onclick="reqTurnoverBalance()"></div>
+                    <div class="image__btn__update" id="report-update" data-tooltip="Оновити дані звіту"></div>
                     <div class="checkbox_div">
                         <input class="checkbox_input" type="checkbox" id="report-checkbox" name="sortSupply" />
                         <label class="checkbox_label" for="report-checkbox">Дата:</label>
@@ -57,46 +57,33 @@
                         </div>
                         <div class="btn__interval" id="interval-btn" data-tooltip="Стандатні періоди звіту">...</div>
                     </div>
+                </div >
+                <div class="countainer__commands">
                     <div class="select__report">
-                        <label for="report-select">Номенклатура:</label>    
-                        <select name="selectTable" id="report-select" onchange="clearTableReport()">
-                                <option value="14">Жирні кислоти (експорт)</option>
-                                <option value="15">Кислота сірчана технічна</option>
+                        <label for="report-select">Звіти:</label>    
+                        <select name="selectTable" id="report-select">
+                                <option value="1">Заборгованість постачальникам</option>
+                                <option value="14">Рух номенклатури: Жирні кислоти</option>
+                                <option value="15">Рух номенклатури: Кислота сірчана технічна</option>
                         </select>
+                    </div>
+                    <div class="input__report">
+                        <label for="name-counterparty-report">Контрагент:</label>
+                        <input type="text" id="name-counterparty-report" readonly placeholder="Натиснить для обрання">
+                        <div id="id-counterparty-report" style="display: none;"></div>
                     </div>
                 </div>
                 <!-- Блок данных -->
                 <!-- Контейнер таблицы отчета -->
                 <div class="container">
-                    <div class="container__table__report" style="width: 1400px;">
-                    <div class="content__layer"></div>
+                    <div class="container__table" style="width: 1400px;">
+                        <div class="content__layer"></div>
                         <table class="table__report" id="table-report">
                             <thead>
-                                <tr>
-                                    <th  style="width: 250px;" onclick="sortTable(0, this, this.closest('table').id)" data-type="dateTime"><div class="table__sort">Дата</div></th>
-                                    <th  style="width: 600px;" onclick="sortTable(1, this, this.closest('table').id)" data-type="string"><div class="table__sort">Документ</div></th>
-                                    <th  style="width: 250px;" onclick="sortTable(2, this, this.closest('table').id)" data-type="number"><div class="table__sort">Прихід/Видаток (кг)</div></th>
-                                </tr>
-                                <tr>
-                                    <th colspan="2" style="text-align: right;">Залишок на початок:</th>
-                                    <th  id="report-OB" style="text-align: right;">0,00</th>
-                                </tr>
                             </thead>
                             <tbody>
                             </tbody>
                             <tfoot>
-                                <tr>
-                                    <td colspan="2">Надходження за період:</td>
-                                    <td id="report-PS">0,00</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">Видаток за період:</td>
-                                    <td id="report-NS">0,00</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" >Залишок на кінець:</td>
-                                    <td id="report-EB">0,00</td>
-                                </tr>
                             </tfoot>
                         </table>
                     </div>
@@ -276,7 +263,7 @@
                     <div class="container__table">
                         <table id="table-product"></table>
                     </div>
-                    <!-- Блок с карточкой транспорта -->
+                    <!-- Блок с карточкой номенклатура -->
                     <div class="container__unit">
                         <div class="input__unit locked-cell">
                             <label for="product-id" >Код:</label>
@@ -382,6 +369,26 @@
 
     </div>
     <div class="interval__form-backdrop" id="backdrop" onclick="closeInterval()"></div>
+
+        <!-- Модальное Выбор контрагента -->
+    <div class="modal" id="counterparties">
+        <h2 style="text-align: center;">Вибір контрагента</h2>
+        <!-- Командная панель таблицы выбора контрагента -->
+        <div class="countainer__commands" style="margin-right: auto;">
+            <div class="image__btn__update" id="cp-update"></div>
+            <div class="command__btn" id="get-counterparty-btn">Обрати</div>
+            <div class="input__find">
+                <label for="input-counterparty-find">Пошук:</label>
+                <input type="text" id="input-counterparty-find" placeholder="Введить строку пошуку" onfocus="this.select();">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="table-counterparties-choice"></table>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="backdrop"></div>
 
     <!-- Окно информации о связанных с удаляемым элементом объектах -->
     <div class="inform__form" id="inform-win">

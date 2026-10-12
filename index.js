@@ -1,3 +1,5 @@
+require ( 'dotenv' ) . config ( ) 
+
 const express = require('express')
 const http = require('http');
 const mysql = require('mysql2/promise')
@@ -9,6 +11,7 @@ const printModule = require('./JS/printModule');
 const recastModule = require('./JS/recastModule');
 const supplyModule = require('./JS/supplyModule');
 const messengerModule = require('./JS/messengerModule');
+const firewallModule = require('./JS/firewallModule');
 const { text } = require('body-parser');
 const { log } = require('console');
 // const { Server } = require('socket.io');
@@ -30,6 +33,11 @@ app.use(express.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
 
 app.get('/', (req, res) => {
+  const firewall = firewallModule.checkIP(req.ip)
+  if (!firewall) {
+    res.status(403).send('Доступ заборонено: вашій IP-адресі не дозволено доступ до цього сервера.')
+    return;
+  }
   res.render('index')
 })
 
@@ -125,16 +133,21 @@ app.post('/users/post/1', async (req, res) => {
         const data = JSON.parse(body);
         data.username = dataUser.username
         data.userpass = dataUser.userpass
-        if (data.text === 'supplys') {
-          const resDatas = await supplyModule.supplys(data)
-          res.status(200).json(resDatas);
-        } else if (data.text === 'supplysList') {
-          const resDatas = await supplyModule.querySupplysList(data)
-          res.status(200).json(resDatas);
-        } else if (data.text === 'dataUser') {
-          const resDatas = await myModule.reqUser(data)
-          res.status(200).json(resDatas);
+        let resDatas 
+        switch(data.text) {
+          case 'supplys':
+            resDatas = await supplyModule.querySupplys(data)
+            break
+          case 'supplysList':
+            resDatas = await supplyModule.querySupplysList(data)
+            break
+          case 'dataUser':
+            resDatas = await myModule.reqUser(data)  
+            break
+          default:
+            resDatas = {result: false, text: 'Помилка у синтаксису запиту.'}
         }
+        res.status(200).json(resDatas);
 
       } catch (error) {
         res.status(400).set('Content-Type', 'text/plain').send('Invalid format file');
@@ -199,7 +212,7 @@ app.post('/users/post/3',  (req, res) => {
           const resDatas = await supplyModule.zeroSupplyParam(data)
           res.status(200).json(resDatas);
         } else if (data.text === 'recast') {
-          const resDatas = await myModule.zeroRecastParam(data)
+          const resDatas = await recastModule.reqSamples()
           // res.status(200).json(resDatas);
           res.send(resDatas)
         } else if (data.text === 'samples') {
@@ -259,6 +272,12 @@ app.post('/users/post/4', async (req, res) => {
           const resDatas = await myModule.turnoverBalance(data)
           res.status(200).json(resDatas);
         }
+
+        if (data.text === 'suppliersDebt') {
+          const resDatas = await myModule.suppliersDebt(data)
+          res.status(200).json(resDatas);
+        }
+
       } catch (error) {
         res.status(400).set('Content-Type', 'text/plain').send(error);
       }
@@ -672,6 +691,7 @@ function validationList(ip, username, userpass) {
 }
 /** Проверка на валидацию пользователя **/
 function getValidationData(ip) {
+
   let result = false
   for (let i = 0; i < arrValidation.length; i++) {
     if (arrValidation[i].ip === ip) {
@@ -708,20 +728,14 @@ io.on('connection', (socket) => {
   if (userId) {
     // Добавляем сокет в комнату, равную вашему ID
     socket.join(userId);
-    console.log(`Клиент с socket.id ${socket.id} привязан к кастомному ID: ${userId}`);
+    // console.log(`Клиент с socket.id ${socket.id} привязан к кастомному ID: ${userId}`);
   }
   
   // Отключение клиента
   socket.on('disconnect', () => {
-    console.log('Клиент отключился:', socket.id);
+    // console.log('Клиент отключился:', socket.id);
   });
 });
-
-// function ioSendMsg(data) {
-//   io.to(data.recipient).emit('personal_message', { text: data });
-// }
-
-// module.exports = {ioSendMsg};
 
 const PORT = 3000
 
@@ -729,6 +743,6 @@ const PORT = 3000
 //   console.log(`Server started: http://localhost:${PORT}`)
 // })
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Сервер запущен на http://localhost:${PORT}`);
 });

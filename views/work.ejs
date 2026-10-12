@@ -46,9 +46,10 @@
         <div>
             <!-- кнопки перехода по таблицам-->
             <div class="tabs__nav">
-                <button class="tabs__nav__btn active" type="button" id="supplys-btn" data-tab="#tab_1" >Надходження</button>
+                <button class="tabs__nav__btn" type="button" id="supplys-btn" data-tab="#tab_1" >Надходження</button>
                 <button class="tabs__nav__btn" type="button" id="recasts-btn" data-tab="#tab_2">Переробка</button>
-                <button class="tabs__nav__btn" type="button" id="list-supplys-btn" data-tab="#tab_3">Список надходжень</button>
+                <button class="tabs__nav__btn" type="button" id="list-supplys-btn" data-tab="#tab_3"
+                style="display: none;">Список надходжень</button>
                 <button class="tabs__nav__btn" type="button" id="list-recasts-btn" data-tab="#tab_4">Список переробок</button>
                 <button class="tabs__nav__btn" type="button" id="messenger-btn" data-tab="#tab_5">
                     <div class="flag__new__msg" id="flag-new-msg"></div>
@@ -74,7 +75,7 @@
     <!-- Таблицы и их командные панели  -->
     <div class="tabs__content ">
         <!-- Поступления -->
-        <div class="tabs__item active" id="tab_1">
+        <div class="tabs__item" id="tab_1">
             <!-- Панель команд выбора поставок -->
             <div class="container-if">
                 <div class="work__btn" id="new-supply">Нове надходження</div>

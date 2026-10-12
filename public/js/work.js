@@ -58,6 +58,14 @@ const observer = new IntersectionObserver((entries, observer) => {
   threshold: 1 // Сработает, когда 100% строки покажется на экране
 });
 
+if(userID === 'oleg') {
+    document.getElementById('recasts-btn').classList.add('active')
+    document.getElementById('tab_2').classList.add('active')
+} else {
+    document.getElementById('supplys-btn').classList.add('active')
+    document.getElementById('tab_1').classList.add('active')
+}
+
 // Создаем событие двойного клика
 const eventDbclick = new MouseEvent('dblclick', {
     bubbles: true,
@@ -488,11 +496,8 @@ function clickGetRequest(event) {
     let idValue = elementTabs.id; // Вернет значение ID, если оно есть
     if (idValue === 'supplys-btn') {
         reqSupplys()
-        sessionStorage.setItem('getSupplyData', 'true')
     } else if (idValue === 'recasts-btn') {
-        // console.log(idValue)
         reqRecasts(event)
-        sessionStorage.setItem('getRecastData', 'true')
     } else if (idValue === 'list-supplys-btn') {
         reqSupplysList()
     } else if (idValue === 'list-recasts-btn') {
@@ -708,13 +713,10 @@ function reqNewMsg() {
             if(data.table.length) {
                 const html = insertRowsTableMsg(data.table)
                 tbodyMessenger.insertAdjacentHTML('beforeend', html);
-                // 2. Находим нужную строку (или все строки) и включаем наблюдение
-                // html.forEach(row => console.log(row));
                 tableMessenger.querySelectorAll('tr.msg__unread').forEach(row => observer.observe(row));
                 reqReportDLVD(data.table)
                 flagNewMsg()
             }
-            // console.log('Запит нових повідомлень виконано вдало! кількість: ', data.table.length)
         }
     })
 }
@@ -1183,8 +1185,6 @@ function clearTableRecasts() {
 }
 
 function clearTableSupplusList() {
-    sessionStorage.setItem('getSupplyData', 'false')
-    sessionStorage.setItem('getRecastData', 'false')
     tableSupplysList.innerHTML = ''
     let htmlSupplysList = ` 
 
@@ -1202,11 +1202,6 @@ function clearTableSupplusList() {
 }
 
 function clearTableRecastsList() {
-    sessionStorage.setItem('getSupplyData', 'false')
-    sessionStorage.setItem('getRecastData', 'false')
-    // while (tableSupplysList.rows.length > 0) {
-    //     tableSupplysList.deleteRow(0);
-    // }
     tableRecastsList.innerHTML = ''
     let html = ` 
                     <thead>
@@ -1423,7 +1418,14 @@ socket.on('connect', () => {
 });
 
 socket.on('received_message', (data) => {
-    reqNewMsg()
+    if(data.length) {
+        const html = insertRowsTableMsg(data)
+        tbodyMessenger.insertAdjacentHTML('beforeend', html);
+        tableMessenger.querySelectorAll('tr.msg__unread').forEach(row => observer.observe(row));
+        reqReportDLVD(data)
+        flagNewMsg()
+    }
+    // reqNewMsg()
   console.log('Новое сообщение:', data);
 });
 

@@ -4,19 +4,27 @@ const format2 = new Intl.NumberFormat('uk-UA', {
 });
 
 const tableProductsChoice = document.getElementById('table-products-choice')
-// const modal = document.querySelectorAll('.modal')
+const modal = document.querySelectorAll('.modal')
+const backdrop1 = document.querySelectorAll('.modal-backdrop')
 const backdrop = document.querySelectorAll('.inform__form-backdrop')
 
 
 const tabsBtn = document.querySelectorAll('.tabs__btn')
 const tabs = document.querySelectorAll('.container__tab')
+const tableCP = document.getElementById('table-counterparties-choice')
 const tableCounterparties = document.getElementById('table-counterparties')
 const tableTransports = document.getElementById('table-transport') 
 const tableProducts = document.getElementById('table-product')
 const tableInform = document.getElementById('table-inform')
 const tableReport = document.getElementById('table-report')
 const tbodyReport = tableReport.querySelector('tbody')
+const theadReport = tableReport.querySelector('thead')
+const tfootReport = tableReport.querySelector('tfoot')
 
+const inputCounterpartyRepot = document.getElementById('name-counterparty-report')
+const inputFindTransport = document.getElementById('input-find-transport')
+const inputFindCounterparty = document.getElementById('input-find-counterparty')
+const inputFindCP = document.getElementById('input-counterparty-find')
 const inputCounterpartyID = document.getElementById('counterparty-id')
 const inputCounterpartyName = document.getElementById('counterparty-name')
 const inputCounterpartyFullName = document.getElementById('counterparty-full-name')
@@ -53,18 +61,10 @@ const inputReportDateStart = document.getElementById('report-date-start')
 const inputReportDateOn = document.getElementById('report-date-on')
 const selectReport = document.getElementById('report-select')
 const checkboxReport = document.getElementById('report-checkbox')
-const reportOB = document.getElementById('report-OB')
-const reportPS = document.getElementById('report-PS')
-const reportNS = document.getElementById('report-NS')
-const reportEB = document.getElementById('report-EB')
 
 let arrCounterparties = []
 let arrTransports = []
 let arrProducts = []
-let arrTurnover = []
-let arrReport = []
-let numberRow  = 0
-
 
 //Сортировка в таблицах
 function sortTable(index, header, tableID) {
@@ -101,8 +101,8 @@ function sortTable(index, header, tableID) {
         
         // Сортируем строки
         rows.sort((rowA, rowB) => {
-        const cellA = rowA.querySelectorAll('td')[index].textContent;
-        const cellB = rowB.querySelectorAll('td')[index].textContent;
+        const cellA = rowA.querySelectorAll('td')[index].innerHTML;
+        const cellB = rowB.querySelectorAll('td')[index].innerHTML;
 
         const type = header.dataset.type;
         let valA, valB;
@@ -156,9 +156,54 @@ document.getElementById('interval-btn').addEventListener('click', () => {
     responseFinish = 'report-date-finish'
 /* Открытие  выбора интервала */
     document.getElementById('interval-win').classList.add('open')
-    clearTableReport()
 })
 
+/* ******************* Выбор контрагента ****************** */
+inputCounterpartyRepot.addEventListener('click', () => {
+    // valSelect = 'provider'
+    fillTableCounterpaties(false, tableCP)
+    document.getElementById('counterparties').classList.add('open')
+    inputFindCP.focus()
+})
+
+// Закрытие модальных окон
+backdrop1.forEach((item) => {
+    item.addEventListener("click", () => modal.forEach((item) => { item.classList.remove('open') }));
+});
+
+//Выбор Контрагента для отчета
+document.getElementById('get-counterparty-btn').addEventListener('click', () => {
+    const row = tableCP.querySelector('tr.selected-row')
+    if (row) getCounterpartyReport(row)
+})
+
+tableCP.addEventListener('dblclick', (event) => {
+    getCounterpartyReport(event.target.closest('tr'))
+})
+
+function getCounterpartyReport(row) {
+    document.getElementById('id-counterparty-report').innerHTML = row.dataset.id
+    inputCounterpartyRepot.value = row.dataset.name
+    document.getElementById('counterparties').classList.remove('open')
+}
+
+//Изменение списка выбора отчетов
+selectReport.addEventListener('change', () => {
+    tbodyReport.innerHTML = ''
+    theadReport.innerHTML = ''
+    tfootReport.innerHTML = ''
+
+    const item = selectReport.value
+    const list = [14,15]
+    if (list.includes(+item)) {
+        document.getElementById('id-counterparty-report').innerHTML = ''
+        inputCounterpartyRepot.value = ''
+        inputCounterpartyRepot.disabled = true
+    } else {
+        inputCounterpartyRepot.disabled = false
+    }
+        // console.log(list)
+})
 
 //Изменение checkbox Report
 checkboxReport.addEventListener('click', () => {
@@ -219,6 +264,11 @@ tableInform.addEventListener('click', (event) => {
     }
 })
 
+// Выделение выбранной строки таблицы выбора контрагена
+tableCP.addEventListener('click', (event) => {
+    selectedCell(event, tableCP)
+})
+
 // Общая функция для выделения строки
 function selectedCell(event, table) {
     table.querySelectorAll('.selected-cell').forEach(cell => cell.classList.remove('selected-cell'));
@@ -228,7 +278,7 @@ function selectedCell(event, table) {
     if (event.target.tagName === 'TD') {
         const cell = event.target;
         const row = cell.parentElement;
-
+        if(row.parentElement.tagName === 'TFOOT') return
         cell.classList.add('selected-cell');
         row.classList.add('selected-row');
         return row.dataset.id
@@ -331,8 +381,15 @@ function getUnitProduct() {
 //Командная панель Контрагенты
 //Обновить список контрагентов
 document.getElementById('counterparty-update').addEventListener('click', () => {
-    reqCounterparties()
+    inputFindCounterparty.value = ''
     clearInputsCounterparty()
+    reqCounterparties(tableCounterparties)
+})
+
+//Обновить список контрагентов в таблице выбра контрагента
+document.getElementById('cp-update').addEventListener('click', () => {
+    inputFindCP.value = ''
+    reqCounterparties(tableCP)
 })
 
 //Очистить inputs в разделе контрагенты
@@ -351,11 +408,19 @@ function clearInputsCounterparty() {
 document.getElementById('counterparty-add').addEventListener('click', () => {clearInputsCounterparty()})
 
 // Получение днных для фильтрации Контрагентов
-document.getElementById('input-find-counterparty').addEventListener('input', () => {
-    const text = document.getElementById('input-find-counterparty').value
-    const temp = document.getElementById('input-find-counterparty').value
-    fillTableCounterpaties(text)
-    document.getElementById('input-find-counterparty').value = temp
+inputFindCounterparty.addEventListener('input', () => {
+    const text = inputFindCounterparty.value
+    fillTableCounterpaties(text, tableCounterparties)
+    inputFindCounterparty.value = text //Обновляем поле, после поиска.
+    highlightTextInTable(tableCounterparties, text)
+})
+
+// Получение днных для фильтрации Контрагентов в таблице выбора
+inputFindCP.addEventListener('input', () => {
+    const text = inputFindCP.value
+    fillTableCounterpaties(text, tableCP)
+    inputFindCP.value = text //Обновляем поле, после поиска.
+    highlightTextInTable(tableCP, text)
 })
 
 //Команднаяя панель транспорт
@@ -381,11 +446,11 @@ function clearInputsTransport() {
 document.getElementById('transport-add').addEventListener('click', () => {clearInputsTransport()})
 
 // Получение днных для фильтрации transport
-document.getElementById('input-find-transport').addEventListener('input', () => {
-    const text = document.getElementById('input-find-transport').value
-    const temp = document.getElementById('input-find-transport').value
+inputFindTransport.addEventListener('input', () => {
+    const text = inputFindTransport.value
     fillTableTtansports(text)
-    document.getElementById('input-find-transport').value = temp
+    inputFindTransport.value = text
+    highlightTextInTable(tableTransports, text)
 })
 
 //Сформировать название транспорта
@@ -465,12 +530,13 @@ function getAddress() {
 }
 
 /* POST запрос на получение данных справочника контрагенты */
-function reqCounterparties() {
+function reqCounterparties(data) {
+    const editTable = data
     sendData(`http://${getAddress()}/users/post/4`, JSON.stringify({
         text: 'counterpaties'
     })).then((data) => {
         arrCounterparties = data.table
-        fillTableCounterpaties()
+        fillTableCounterpaties(false, editTable)
         toast('Довідник контрагенти завантажено.')
     })
 }
@@ -515,7 +581,7 @@ function reqSaveCounterparty() {
         } else {
             inputCounterpartyID.value = data.id
             arrCounterparties = data.table
-            fillTableCounterpaties()
+            fillTableCounterpaties(false, tableCounterparties)
             toast('Контрагента збережено.')
         }
     })
@@ -558,7 +624,7 @@ function reqDeleteItemDirectory(directory) {
             toast('Контрагента видалено.')
             clearInputsCounterparty()
             arrCounterparties = data.table
-            fillTableCounterpaties()
+            fillTableCounterpaties(false, tableCounterparties)
             break
         case 'transports':
             toast('Транспорт видалено.')
@@ -620,6 +686,42 @@ function reqSaveProduct() {
     })
 }
 
+// Обновление отчена
+document.getElementById('report-update').addEventListener('click', () => {
+    if(+selectReport.value === 1) {
+        if(!document.getElementById('id-counterparty-report').innerHTML) return
+        reqSuppliersDebt()
+    } else {reqTurnoverBalance()}
+})
+
+//Запрос задолженность поставщикам
+function reqSuppliersDebt() {
+    let dateStart
+    let dateFinish
+    if (checkboxReport.checked) {
+        dateStart = convertDate(inputReportDateOn.value)
+        dateFinish = convertDate(inputReportDateOn.value)
+    } else {
+        dateStart = convertDate(inputReportDateStart.value)
+        dateFinish = convertDate(inputReportDateFinish.value)
+    }
+
+    sendData(`http://${getAddress()}/users/post/4`, JSON.stringify({
+        text: 'suppliersDebt',
+        dateStart: dateStart,
+        dateFinish: dateFinish,
+        id: +document.getElementById('id-counterparty-report').innerHTML
+    })).then((data) => {
+        if (!data.result) {
+            toast(data.text)
+        } else {
+            if(!data.table.length) return toast('Інформація відсутня')
+            // console.log(data)
+            fillSuppliersDebt(data)
+        }
+    })
+}
+
 //Запрос данных отчета
 function reqTurnoverBalance() {
     let dateStart
@@ -641,12 +743,7 @@ function reqTurnoverBalance() {
         if (!data.result) {
             toast(data.text)
         } else {
-            arrReport = data.turnover
-            fillTableReport()
-            reportOB.textContent = format2.format(data.balance[0].OB)
-            reportPS.textContent = format2.format(data.balance[0].PS)
-            reportNS.textContent = format2.format(data.balance[0].NS)
-            reportEB.textContent = format2.format(data.balance[0].EB)
+            fillTurnoverBalance(data)
         }
     })
 }
@@ -664,7 +761,7 @@ function reqinitializationAccounting() {
             arrTransports =data.transports
             fillTableTtansports()
             arrCounterparties = data.counterparties
-            fillTableCounterpaties()
+            fillTableCounterpaties(false, tableCounterparties)
             toast('Початкове налаштування пройшло успішно.')
         }
     })
@@ -685,7 +782,7 @@ function initialization() {
 }
 
 //Заполнение таблицы выбора конрагентов
-function fillTableCounterpaties(data) {
+function fillTableCounterpaties(data, table) {
 
     if (arrCounterparties.length === 0) return false
     let arrTemp = arrCounterparties
@@ -694,7 +791,7 @@ function fillTableCounterpaties(data) {
         const regex = new RegExp(data, 'i');;
         arrTemp = arrCounterparties.filter(item => regex.test(item.name) || regex.test(item.OKPO))
     }
-    tableCounterparties.innerHTML = `
+    table.innerHTML = `
                 <thead>
                     <tr>
                         <th  style="width: 300px;">Найменування</th>
@@ -704,7 +801,7 @@ function fillTableCounterpaties(data) {
                 <tbody>
                 </tbody>
     `
-    const tableBody = document.querySelector('#table-counterparties tbody');
+    const tableBody = table.querySelector('tbody');
 
     let html = ``
 
@@ -736,7 +833,7 @@ function fillTableCounterpaties(data) {
 /**************** Модальное окно с ифрмацией при удалении */
 //Открытие окна с информацией
 function openInform(data) {
-    document.getElementById('directory-name').textContent = data.directory
+    document.getElementById('directory-name').innerHTML = data.directory
     let arr
     let nameItem
     switch(data.directory) {
@@ -759,9 +856,9 @@ function openInform(data) {
     const item = arr.find(obj => obj.id === +data.id)
     // console.log(data)
     const textHead = `Видалення ${nameItem}: "${item.name}" неможливо, бо його використано в наступних записах:`
-    document.getElementById('inform-head').textContent = textHead
+    document.getElementById('inform-head').innerHTML = textHead
     const tableBody = tableInform.querySelector('tbody')
-    tableBody.textContent = ''
+    tableBody.innerHTML = ''
     let html = ''
     data.listRow.forEach((row) => {
         const textRow = `Надходження № ${row.number} від ${row.date} p.`
@@ -819,7 +916,7 @@ function fillTableTtansports(data) {
                     </tr>`
         }
         tableBody.insertAdjacentHTML('beforeend', html);
-        document.getElementById('input-find-transport').value =''
+        inputFindTransport.value =''
         if (inputTransportID.value) {
             const id = inputTransportID.value
             const selectedRow = tableTransports.querySelector(`tr[data-id="${id}"]`);
@@ -880,33 +977,78 @@ function fillTableProducts(data) {
     }
 }
 
-function clearTableReport() {
+
+//Заполнение таблицы отчета Задолженность поставщикам
+function fillSuppliersDebt(dataCase) {
     tbodyReport.innerHTML = ''
-    reportOB.textContent = '0,00'
-    reportPS.textContent ='0,00'
-    reportNS.textContent = '0,00'
-    reportEB.textContent ='0,00'
-    //Убираем класс сортировки
-    // Находим вообще все заголовки таблицы
-    const allTh = tableReport.querySelectorAll('th');
+    theadReport.innerHTML = ''
+    tfootReport.innerHTML = ''
 
-    // Оставляем только те, у которых внутри есть хотя бы один div
-    const filteredTh = Array.from(allTh).filter(th => th.querySelector('div'));
+    const data = dataCase.table
 
-    filteredTh.forEach(th => {
-        th.firstElementChild.classList.remove('sort__up')
-        th.firstElementChild.classList.remove('sort__down')
-    });
-    
+    const sum = (matrix, key) => 
+    matrix.flat().reduce((total, obj) => total + (obj?.[key] || 0), 0).toLocaleString('ru-RU', { minimumFractionDigits: 2 });    //Заполняем строки таблицы
+
+    const vendorName = data[0].vendorName
+    const balanceStartDebt = sum(data, 'balanceStartDebt')
+    const balanceStartPrepay = sum(data, 'balanceStartPrepay')
+    const turnoverIncreaseDebt = sum(data, 'turnoverIncreaseDebt')
+    const turnoverPayment = sum(data, 'turnoverPayment')
+    const balanceEndDebt = sum(data, 'balanceEndDebt')
+    const balanceEndPrepay = sum(data, 'balanceStartPrepay')
+    let html = `<tr style="text-align: right;background-color: #e0e0e0;"><td style="text-align: left;">${vendorName}</td>
+    <td>${balanceStartDebt}</td><td>${balanceStartPrepay}</td>
+    <td>${turnoverIncreaseDebt}</td><td>${turnoverPayment}</td>
+    <td>${balanceEndDebt}</td><td>${balanceEndPrepay}</td></tr>`
+    data.forEach(row => {
+        html += `<tr  style="text-align: right;">
+                    <td style="text-align: left;padding-left: 20px;">${row.contract}</td>
+                    <td>${row.balanceStartDebt.toLocaleString('ru-RU', { minimumFractionDigits: 2 })}</td>
+                    <td>${row.balanceStartPrepay.toLocaleString('ru-RU', { minimumFractionDigits: 2 })}</td>
+                    <td>${row.turnoverIncreaseDebt.toLocaleString('ru-RU', { minimumFractionDigits: 2 })}</td>
+                    <td>${row.turnoverPayment.toLocaleString('ru-RU', { minimumFractionDigits: 2 })}</td>
+                    <td>${row.balanceEndDebt.toLocaleString('ru-RU', { minimumFractionDigits: 2 })}</td>
+                    <td>${row.balanceEndPrepay.toLocaleString('ru-RU', { minimumFractionDigits: 2 })}</td>
+                </tr>`
+    })        
+    tbodyReport.insertAdjacentHTML('beforeend', html);
+
+    // Заполнить шапку и подвал таблицы отчетов
+    const theadHtml = `<tr>
+<th style="width: 30%;text-align: left;">Постачальник</th><th colspan="2">Борг на ${formatDateUA(new Date(dataCase.dateStart))}</th>
+<th rowspan="2">Збільшення боргу</th><th rowspan="2">Погашення боргу</th><th colspan="2">Борг на ${formatDateUA(new Date(dataCase.dateFinish))}</th>
+</tr>
+<tr><th style="text-align: left;">Договір</th><th>Борг</th><th>Аванс</th><th>Борг</th><th>Аванс</th></tr>
+    `
+    theadReport.insertAdjacentHTML('beforeend', theadHtml);
+
+    const tfootHtml = `<tr style="text-align: right;">
+<td>Разом</td>
+<td>${balanceStartDebt}</td>
+<td>${balanceStartPrepay}</td>
+<td>${turnoverIncreaseDebt}</td>
+<td>${turnoverPayment}</td>
+<td>${balanceEndDebt}</td>
+<td>${balanceEndPrepay}</td>
+</tr>
+    `
+    tfootReport.insertAdjacentHTML('beforeend', tfootHtml);
+
 }
 
-//Заполнение таблицы отчета
-function fillTableReport() {
-    clearTableReport()
-    if (!arrReport.length) return
+//Заполнение таблицы отчета товарооборот
+function fillTurnoverBalance(data) {
+    tbodyReport.innerHTML = ''
+    theadReport.innerHTML = ''
+    tfootReport.innerHTML = ''
+    if (!data.turnover.length && !data.balance.length) {
+        toast('Дані відсутні')
+        return
+    }
 
+    //Заполняем строки таблицы
     let html = ``
-    arrReport.forEach(row => {
+    data.turnover.forEach(row => {
         const textColor = row.qty < 0 ? 'class="text__red"' : ''
         const qty = Number(row.qty)
         html += `<tr data-id="${row.storage_id}">
@@ -916,6 +1058,36 @@ function fillTableReport() {
                 </tr>`
     })        
     tbodyReport.insertAdjacentHTML('beforeend', html);
+
+    // Заполнить шапку и подвал таблицы отчетов
+    const theadHtml = `
+            <tr>
+                <th  style="width: 250px;" onclick="sortTable(0, this, this.closest('table').id)" data-type="dateTime"><div class="table__sort">Дата</div></th>
+                <th  style="width: 600px;" onclick="sortTable(1, this, this.closest('table').id)" data-type="string"><div class="table__sort">Документ</div></th>
+                <th  style="width: 250px;" onclick="sortTable(2, this, this.closest('table').id)" data-type="number"><div class="table__sort">Прихід/Видаток (кг)</div></th>
+            </tr>
+            <tr>
+                <th colspan="2" style="text-align: right;">Залишок на початок:</th>
+                <th style="text-align: right;">${format2.format(data.balance[0].OB)}</th>
+            </tr>
+    `
+    const tfootHtml = `
+                        <tr>
+                            <td colspan="2">Надходження за період:</td>
+                            <td>${format2.format(data.balance[0].PS)}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Видаток за період:</td>
+                            <td>${format2.format(data.balance[0].NS)}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" >Залишок на кінець:</td>
+                            <td>${format2.format(data.balance[0].EB)}</td>
+                        </tr>
+    `
+    theadReport.insertAdjacentHTML('beforeend', theadHtml);
+    tfootReport.insertAdjacentHTML('beforeend', tfootHtml);
+
 }
 
 
@@ -1001,24 +1173,6 @@ document.querySelectorAll('.form-control-time').forEach(el => {
 });
 
 
-// Формат даты yyyy-mm-dd
-function formatDateUs(d) {
-    return [
-        d.getFullYear(),
-        (d.getMonth() + 1).toString().padStart(2, '0'),
-        d.getDate().toString().padStart(2, '0'),
-    ].join('-');
-}
-
-// Формат даты dd.mm.yyyy 00:00:00
-function formatDate0(d) {
-    return [
-        d.getDate().toString().padStart(2, '0'),
-        (d.getMonth() + 1).toString().padStart(2, '0'),
-        d.getFullYear() + ' 00:00:00'
-    ].join('.');
-}
-
   // Возвращаем строку в формате yyyy-mm-dd 
 function convertDate(dateStr) {
   // Разделяем строку по точке
@@ -1081,7 +1235,7 @@ function toast(message) {
     const toastContainer = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.classList.add('toast');
-    toast.textContent = message;
+    toast.innerHTML = message;
     toastContainer.appendChild(toast);
 
     // Добавляем класс 'show' для анимации появления
@@ -1125,3 +1279,23 @@ function formatInput1Sign(input) {
     }
 }
 
+// Выделение фрагмента поиска в таблице
+function highlightTextInTable(table, searchText) {
+    if (!table || !searchText) return;
+
+    // Создаем регулярное выражение для поиска (без учета регистра и глобально)
+    const regex = new RegExp(`(${searchText})`, 'gi');
+    
+    const tbody = table.querySelector('tbody')
+
+    // Находим все ячейки в таблице
+    const cells = tbody.querySelectorAll('td');
+
+    cells.forEach(cell => {
+        // Проверяем, содержит ли ячейка искомый текст
+        if (cell.innerHTML.toLowerCase().includes(searchText.toLowerCase())) {
+            // Заменяем текст внутри ячейки с сохранением HTML-структуры, если она простая
+            cell.innerHTML = cell.innerHTML.replace(regex, '<mark style="background-color: yellow;">\$1</mark>');
+        }
+    });
+}

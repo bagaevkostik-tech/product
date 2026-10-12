@@ -1,3 +1,6 @@
+const db = require('./db');
+
+
 async function getTransport(t, conn) {
     const [rows, fields] = await conn.execute(`SELECT name FROM transports WHERE id = ${t};`)
     return (rows[0]) ? rows[0].name : ''
@@ -7,12 +10,6 @@ async function getCounterparty(c, conn) {
     const [rows, fields] = await conn.execute(`SELECT name FROM counterparties WHERE id = ${c};`)
     return (rows[0]) ? rows[0].name : ''
 }
-
-async function getNomenclature(n, conn) {
-    const [rows, fields] = await conn.execute(`SELECT name FROM nomenclatures WHERE id = ${n};`)
-    return (rows[0]) ? rows[0].name : ''
-}
-
 
 // Формат даты dd.mm.yyyy
 function formatDateUa(d) {
@@ -126,7 +123,6 @@ module.exports = {
     formatDateUsTime: formatDateUsTime,
     getCounterparty: getCounterparty,
     getTransport: getTransport,
-    getNomenclature: getNomenclature,
     convertDate: convertDate,
     formatDateFirstDay: formatDateFirstDay,
     formatDateLastDay: formatDateLastDay,

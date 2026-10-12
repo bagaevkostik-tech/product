@@ -204,3 +204,8 @@ Select c dropdown JS
     display: none;
 }
 
+/* Этот код заставит все ячейки внутри вашей строки окраситься в нужный цвет */
+tr[style*="background-color"] th, 
+tr[style*="background-color"] td {
+    background-color: inherit !important;
+}

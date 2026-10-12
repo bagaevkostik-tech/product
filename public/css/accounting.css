@@ -93,6 +93,55 @@ input[type="number"]::-webkit-outer-spin-button {
     padding: 8px;
 }
 
+/* Контейнер таблицы */
+.table-container {
+    display: flex;
+    flex-direction: column; /* Элементы идут в колонку */
+    gap: 10px;           /* Расстояние между элементами */
+    width: 95%;          /* На мобильных займет почти всю ширину */
+    max-width: 780px;    /* На компьютерах не станет слишком большим */
+    height: 600px; /* Высота блока */
+    overflow-y: auto; /* Прокрутка по вертикали */
+    border: 1px solid #ccc;
+}
+
+/* Фиксация шапки */
+.table-container table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-container th {
+    position: sticky;
+    top: 0;
+    text-align: center;
+    background-color: #f2f2f2; /* Обязательный фон */
+    z-index: 2; /* Шапка поверх контента */
+    padding: 10px;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Тень для красоты */
+}
+
+.table-container  th, td {
+    word-wrap: break-word; /* Перенос длинных слов */
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+tfoot {
+    position: sticky;
+    bottom: 0;
+    background-color: #f2f2f2; /* Чтобы текст не накладывался */
+}
+
+.table-container tfoot td {
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 10px;
+}
+
+
 #inform-head {
     font-size: 24px;
     text-align: center;
@@ -324,69 +373,6 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 
-/* Контейнер таблицы report*/
-.container__table__report {
-    position: relative; /* Относительное позиционирование для базы */
-    width: 770px;
-    height: 800px; /* Высота блока */
-    overflow-y: auto; /* Прокрутка по вертикали */
-    border: 1px solid #ccc;
-    margin-left: 10px;
-}
-
-
-/* Фиксация шапки */
-.container__table__report table {
-    table-layout: fixed;
-    width: 100%;
-    border-collapse: collapse;
-}
-
-/* Первая строка шапки */
-.container__table__report thead tr:first-child th {
-  top: 0; /* Прилипает к самому верху */
-}
-
-/* Вторая строка шапки (прилипает под первой строкой) */
-.container__table__report thead tr:last-child th {
-  top: 46px; /* Высота первой строки (зависит от вашего шрифта/padding) */
-}
-
-.container__table__report th {
-    position: sticky;
-    top: 0;
-    text-align: center;
-    background-color: #f2f2f2; /* Обязательный фон */
-    z-index: 10; /* Шапка поверх контента */
-    padding: 10px;
-    border: 1px solid #ccc;
-    font-size: 1.4rem;
-    box-shadow: inset 0 -4px 0px rgba(0, 0, 0, 0.1); /* Тень снизу шапки */
-}
-
-.container__table__report   td {
-    word-wrap: break-word; /* Перенос длинных слов */
-    padding: 8px;
-
-    font-size: 1.4rem;
-  }
-
-.container__table__report tfoot {
-    position: sticky;
-    bottom: 0;
-    background-color: #f2f2f2; /* Чтобы текст не накладывался */
-}
-
-.container__table__report tfoot td {
-    font-size: 1.4rem;
-    font-weight: bold;
-    text-align: right;
-    padding-right: 10px;
-    box-shadow: inset 0 -4px 0px rgba(0, 0, 0, 0.1); /* Тень снизу шапки */
-}
-
-
-/* Контейнер таблицы */
 .container__table {
     width: 770px;
     height: 800px; /* Высота блока */
@@ -404,13 +390,18 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .container__table th {
     position: sticky;
-    top: 0;
+    /* top: 0; */
     text-align: center;
-    background-color: #f2f2f2; /* Обязательный фон */
+    background-color: #ccc; /* Обязательный фон */
     z-index: 2; /* Шапка поверх контента */
     padding: 10px;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Тень для красоты */
     box-shadow: inset 0 -4px 0px rgba(0, 0, 0, 0.1); /* Тень снизу шапки */
+    border: 1px solid #000
+    /* Добавьте эту строку: */
+    /* outline: 1px solid #ccc; 
+    font-size: 1.4rem;     */
+    
 }
 
 .container__table  th, td {
@@ -424,9 +415,10 @@ input[type="number"]::-webkit-outer-spin-button {
 .container__table tfoot {
     position: sticky;
     bottom: 0;
-    background-color: #f2f2f2; /* Чтобы текст не накладывался */
+    background-color: #ccc; /* Чтобы текст не накладывался */
 }
 
+/* .container__table__report */
 .container__table tfoot td {
     font-size: 1.4rem;
     font-weight: bold;
@@ -434,15 +426,16 @@ input[type="number"]::-webkit-outer-spin-button {
     padding-right: 10px;
 }
 
-.tb__body td {
-    font-size: 14px;
-    border: 1px solid #ccc;
-    /* Общая граница для всех ячеек */
-    /* padding: 8px; Добавляет отступ внутри ячейки */
-    text-align: left;
-    /* Выравнивание текста в ячейках */
+/* ФИКСАЦИЯ ПЕРВОЙ СТРОКИ: прижимается к самому верху контейнера */
+.container__table thead tr:nth-child(1) th {
+    top: 0;
 }
 
+/* ФИКСАЦИЯ ВТОРОЙ СТРОКИ: встает ровно под первой строкой */
+/* Важно: укажите точную высоту первой строки (высота текста + padding + border) */
+.container__table thead tr:nth-child(2) th {
+    top: 41px; /* Если у th padding 10px и font-size 1.4rem, высота ~41px */
+}
 
 /* Делаем группу полей гибкой для одной строки */
 .input__unit {
@@ -467,6 +460,32 @@ input[type="number"]::-webkit-outer-spin-button {
 
     border: 1px solid #ddd;
     font-size: 1.4rem;
+}
+
+/* Делаем группу полей гибкой для одной строки */
+.input__report {
+    display: flex;
+    margin-bottom: 5px;
+    align-items: center; /* Выравнивание по вертикали */
+    gap: 15px; /* Расстояние между label и input */
+}
+
+/* Задаем фиксированную ширину для label */
+.input__report label {
+    width: 100px;
+    /* margin-left: 15px; */
+    font-size: 1.2rem;
+}
+
+/* Задаем ширину для input */
+.input__report input {
+    width: 450px; /* Фиксированная ширина */
+    padding: 8px;
+    box-sizing: border-box; /* Чтобы padding не увеличивал общую ширину */
+
+    border: 1px solid #ddd;
+    font-size: 1.4rem;
+    cursor: pointer;
 }
 
 .input__btn {
@@ -599,9 +618,40 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .select__report label {
     margin-left: 15px;
-    width: 140px; /* Фиксированная ширина метки */
+    width: 60px; /* Фиксированная ширина метки */
     flex-shrink: 0; /* Запрещаем сжиматься метке */
     font-size: 1.2rem;
+}
+
+#counterparty-report {
+    display: flex;
+    align-items: center; /* Центрирование по вертикали */  
+    justify-content: left; /* Центрирование по горизонтали (если нужно) */  
+    white-space: nowrap;   /* Запрещаем перенос текста на новую строку */
+    overflow: hidden;      /* Скрываем текст, который вылазит за границы */
+    text-overflow: ellipsis; /* Добавляем троеточие в конце */
+    width: 300px;          /* Обязательно задайте ширину блока */
+    height: 48px;
+    margin-top: 5px;
+    position: relative;
+
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    appearance: none;
+    line-height: 48px; /* Должно совпадать с height */
+    text-align: center;    
+
+    padding-left: 8px;
+    font-family: inherit;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+#counterparty-report::before {
+    content: "Контраген";
+    display: block;
+    position: absolute;
+    height: 32px;
 }
 
 .locked__cell {
@@ -859,4 +909,46 @@ input[type="number"]::-webkit-outer-spin-button {
     opacity: 1;
 }
 
+/* Модальные окна */
+.modal {
+    display: none;
+}
 
+.modal.open {
+    display: flex;
+    justify-content: center; /* Центрирование по горизонтали */
+    align-items: center;
+    flex-direction: column; /* Элементы идут в колонку */
+    gap: 10px;           /* Расстояние между элементами */
+    width: 80%;          /* На мобильных займет почти всю ширину */
+    max-width: 800px;    /* На компьютерах не станет слишком большим */
+    position: fixed;
+    top: 50px;
+    transform: translateX(-50%);
+    left: 50%;
+    background: #fff;
+    z-index: 200;
+    padding: 1.5rem;
+    border-radius: 5px;
+}
+
+.modal.open+.modal-backdrop {
+    display: block;
+}
+
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 10;
+}
+
+/* Этот код заставит все ячейки внутри вашей строки окраситься в нужный цвет */
+tr[style*="background-color"] th, 
+tr[style*="background-color"] td {
+    background-color: inherit !important;
+}

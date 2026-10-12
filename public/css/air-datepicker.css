@@ -833,3 +833,9 @@
     height: 100%;
     transition: opacity var(--adp-overlay-transition-duration) var(--adp-overlay-transition-ease), height 0s, width 0s
 }
+
+/* Этот код заставит все ячейки внутри вашей строки окраситься в нужный цвет */
+tr[style*="background-color"] th, 
+tr[style*="background-color"] td {
+    background-color: inherit !important;
+}

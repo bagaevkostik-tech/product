@@ -302,6 +302,7 @@ div {
 }
 
 .tabs__nav__btn {
+    width: 25%;
     padding: 15px 30px;
     font-size: 20px;
     border: 0;
