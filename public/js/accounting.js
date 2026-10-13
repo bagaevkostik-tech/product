@@ -34,6 +34,7 @@ const inputCounterpartyTelefon = document.getElementById('counterparty-telefon')
 // const inputCounterpartyType = document.getElementById('counterparty-documents_id')
 const inputCounterpartyIDBAS = document.getElementById('counterparty-id-bas')
 const selectConterpartyType = document.getElementById('counterparty-type')
+const loader = document.getElementById('loader');
 
 const inputTransportID = document.getElementById('transport-id')
 const inputTransportName = document.getElementById('transport-name')
@@ -506,21 +507,31 @@ tabsBtn.forEach((element) => {
 
 // Отправка запроса
 const sendData = async (url, data) => {
+  try {
+        // 1. Показываем заставку (удаляем класс скрытия)
+        loader.classList.remove('hidden'); 
+        
+        // 2. Выполняем запрос к серверу
+        const response = await fetch(url, {
+            method: 'POST',
+            body: data,
+        })
 
-    const response = await fetch(url, {
-        method: 'POST',
-        body: data,
-    })
-
-    if (!response.ok) {
-        if (response.status === 401) {
-            window.location.href = `http://${getAddress()}/`;
-        } else {
-            throw new Error(`Ошибка: ${response.status}`);
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = `http://${getAddress()}/`;
+            } else {
+                throw new Error(`Ошибка: ${response.status}`);
+            }
         }
-    }
 
-    return await response.json()
+        return await response.json()
+  } catch (error) {
+    console.error('Ошибка запроса:', error);
+  } finally {
+    // 3. Убираем заставку в любом случае (даже при ошибке)
+    loader.classList.add('hidden'); 
+  }
 }
 
 function getAddress() {

@@ -144,6 +144,15 @@ app.post('/users/post/1', async (req, res) => {
           case 'dataUser':
             resDatas = await myModule.reqUser(data)  
             break
+          case 'newSupply':
+            resDatas = await supplyModule.newSupply(data)
+            break
+          case 'openSupply':
+            resDatas = await supplyModule.openSupply(data)
+            break
+          case 'saveSupply':
+            resDatas = await supplyModule.saveSupply(data)
+            break
           default:
             resDatas = {result: false, text: 'Помилка у синтаксису запиту.'}
         }
@@ -208,10 +217,7 @@ app.post('/users/post/3',  (req, res) => {
         const data = JSON.parse(body); 
         data.username = dataUser.username
         data.userpass = dataUser.userpass
-        if (data.text === 'supply') {
-          const resDatas = await supplyModule.zeroSupplyParam(data)
-          res.status(200).json(resDatas);
-        } else if (data.text === 'recast') {
+        if (data.text === 'recast') {
           const resDatas = await recastModule.reqSamples()
           // res.status(200).json(resDatas);
           res.send(resDatas)
@@ -392,14 +398,12 @@ app.post('/users/post/10', async (req, res) => {
         const data = JSON.parse(body);
         data.username = dataUser.username
         data.userpass = dataUser.userpass
-        if (data.text === 'saveSupply') {
-          const resDatas = await supplyModule.saveSupply(data)
-          res.status(200).json(resDatas);
-        }
+
         if (data.textreq === 'lab') {
           const resDatas = await recastModule.saveLAB(data)
           res.status(200).json(resDatas);
         }
+        
       } catch (error) {
         res.status(400).set('Content-Type', 'text/plain').send('Invalid format file');
       }
@@ -426,20 +430,23 @@ app.post('/users/post/11', (req, res) => {
         const data = JSON.parse(body);
         data.username = dataUser.username
         data.userpass = dataUser.userpass
-        if (data.text === 'openSupply') {
-          const resDatas = await supplyModule.querySupply(data)
-          res.status(200).json(resDatas);
-        } else if (data.text === 'recast') {
-            const resDatas = await recastModule.openRecast(data)
-            res.send(resDatas);
-        } else if (data.text === 'removeSample') {
-            const resDatas = await recastModule.removeSample(data)
-            res.send(resDatas);
+
+        let resDatas
+        switch(data.text) {
+          case 'recast':
+            resDatas = await recastModule.openRecast(data)
+            break
+          case 'removeSample':
+            resDatas = await recastModule.removeSample(data)
+            break
+          default:
+            resDatas = {result: false, text: 'Помилка у синтаксису запиту.'}
         }
-      } catch (error) {
-        // console.log(error)
+
+        res.send(resDatas);
+
+        } catch (error) {
         res.status(400).set('Content-Type', 'text/plain').send(error);
-        // res.status(400).set('Content-Type', 'text/plain').send('Invalid format file');
       }
     });
   } else {

@@ -16,6 +16,7 @@ const sampleSodium = document.getElementById('sodium-sample')
 const sampleFoamy = document.getElementById('foamy-sample')
 const dateStart = document.getElementById('date-start')
 const dateFinish = document.getElementById('date-finish')
+const loader = document.getElementById('loader');
 
 let arrSample
 let arrSupplysChoice
@@ -626,21 +627,31 @@ function calcSample(rowS, rowR) {
 
 // Отправка POST запроса
 const sendData = async (url, data) => {
+  try {
+        // 1. Показываем заставку (удаляем класс скрытия)
+        loader.classList.remove('hidden'); 
 
-    const response = await fetch(url, {
-        method: 'POST',
-        body: data,
-    })
+        // 2. Выполняем запрос к серверу
+        const response = await fetch(url, {
+            method: 'POST',
+            body: data,
+        })
 
-    if (!response.ok) {
-        if (response.status === 401) {
-            window.location.href = `http://${getAddress()}/`;
-        } else {
-            throw new Error(`Ошибка: ${response.status}`);
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = `http://${getAddress()}/`;
+            } else {
+                throw new Error(`Ошибка: ${response.status}`);
+            }
         }
-    }
 
-    return await response.json()
+        return await response.json()
+        } catch (error) {
+        console.error('Ошибка запроса:', error);
+        } finally {
+        // 3. Убираем заставку в любом случае (даже при ошибке)
+        loader.classList.add('hidden'); 
+    }
 }
 
 function getAddress() {

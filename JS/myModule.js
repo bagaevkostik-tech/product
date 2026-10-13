@@ -369,8 +369,6 @@ async function sendMsg(data) {
         const io = socketStorage.getIO();
         const [rows] = await db.query(sql2, [data.recipient, data.text, data.sender])
         io.to(data.recipient).emit('received_message', rows);
-        
-        console.log('Успешно сохранено сообщение в базу данных');
     } catch (error) {
         const textError = 'Ошибка сохранения сообщения в БД мессенжера\n' + util.inspect(error, { showHidden: false, depth: null });
         await saveErrorToDB(textError)

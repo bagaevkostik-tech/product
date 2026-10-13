@@ -87,7 +87,7 @@ async function printRecast(data) {
 }
 
 async function printListSupplys(dataEnter) {
-    const array = await myModule.querySupply(dataEnter)
+    const array = await myModule.openSupply(dataEnter)
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('DataSheet', { views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }] });
 

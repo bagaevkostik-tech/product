@@ -1,13 +1,13 @@
 const db = require('./db');
 
 
-async function getTransport(t, conn) {
-    const [rows, fields] = await conn.execute(`SELECT name FROM transports WHERE id = ${t};`)
+async function getTransport(t) {
+    const [rows, fields] = await db.query(`SELECT name FROM transports WHERE id = ${t};`)
     return (rows[0]) ? rows[0].name : ''
 }
 
-async function getCounterparty(c, conn) {
-    const [rows, fields] = await conn.execute(`SELECT name FROM counterparties WHERE id = ${c};`)
+async function getCounterparty(c) {
+    const [rows] = await db.query(`SELECT name FROM counterparties WHERE id = ${c};`)
     return (rows[0]) ? rows[0].name : ''
 }
 
@@ -67,7 +67,6 @@ function formatDateLastDay(d) {
 function convertDate(dateStr) {
   // Разделяем строку по точке
   const parts = dateStr.split('.'); 
-  // parts[0] - день, parts[1] - месяц, parts[2] - год
   
   // Возвращаем строку в формате yyyy-mm-dd
   return `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -78,8 +77,8 @@ function numberMM(d) {
     return month
 }
 
-async function getQuickList(user, conn) {
-        const [provider, fields] = await conn.execute(`
+async function getQuickList(user) {
+        const [provider, fields] = await db.query(`
 SELECT id_value AS value , tbl1.Name AS text
 FROM quick_list AS tbl
 INNER JOIN
@@ -87,7 +86,7 @@ counterparties AS tbl1 ON tbl.id_value = tbl1.ID
 WHERE id_user= "${user}" AND id_value IS NOT NULL AND tbl.name_type = 'Provider'
 ORDER BY name_type, num DESC ;
     `)
-        const [carrier, field] = await conn.execute(`
+        const [carrier, field] = await db.query(`
 SELECT id_value AS value , tbl1.Name AS text
 FROM quick_list AS tbl
 INNER JOIN
@@ -95,7 +94,7 @@ counterparties AS tbl1 ON tbl.id_value = tbl1.ID
 WHERE id_user= "${user}" AND id_value IS NOT NULL AND tbl.name_type = 'Carrier'
 ORDER BY name_type, num DESC ;
     `)
-        const [transport, fiel] = await conn.execute(`
+        const [transport, fiel] = await db.query(`
 SELECT id_value AS value , tbl1.Name AS text
 FROM quick_list AS tbl
 INNER JOIN
@@ -103,7 +102,7 @@ transports AS tbl1 ON tbl.id_value = tbl1.ID
 WHERE id_user= "${user}" AND id_value IS NOT NULL AND tbl.name_type = 'Transport'
 ORDER BY name_type, num DESC ;
     `)
-        const [product, fie] = await conn.execute(`
+        const [product, fie] = await db.query(`
 SELECT id_value AS value , tbl1.Name AS text
 FROM quick_list AS tbl
 INNER JOIN
@@ -118,16 +117,16 @@ ORDER BY name_type, num DESC ;
 
 // Экспортируем функцию
 module.exports = {
-    formatDateUs: formatDateUs,
-    formatDateUa: formatDateUa,
-    formatDateUsTime: formatDateUsTime,
-    getCounterparty: getCounterparty,
-    getTransport: getTransport,
-    convertDate: convertDate,
+    formatDateUs,
+    formatDateUa,
+    formatDateUsTime,
+    getCounterparty,
+    getTransport,
+    convertDate,
     formatDateFirstDay: formatDateFirstDay,
-    formatDateLastDay: formatDateLastDay,
-    numberMM: numberMM,
-    getQuickList: getQuickList
+    formatDateLastDay,
+    numberMM,
+    getQuickList
 
 };
 

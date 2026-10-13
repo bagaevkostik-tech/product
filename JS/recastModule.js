@@ -120,9 +120,9 @@ async function sopplysForRecast (data) {
             });
             for (let i = 0; i < rows.length; i++) {
                 rows[i].date = mainModule.formatDateUa(rows[i].date)
-                if (rows[i].providerID) {rows[i].providerName = await mainModule.getCounterparty(rows[i].providerID, conn)}
+                if (rows[i].providerID) {rows[i].providerName = await mainModule.getCounterparty(rows[i].providerID)}
                 else {rows[i].providerName = ''}
-                if (rows[i].transportID) rows[i].transportName = await mainModule.getTransport(rows[i].transportID, conn)
+                if (rows[i].transportID) rows[i].transportName = await mainModule.getTransport(rows[i].transportID)
                     else {rows[i].transportName = ''}
                 if (rows[i].productID) rows[i].productName = await getNomenclature(rows[i].productID)
                 if (!rows[i].pctProvider) rows[i].pctProvider = ''

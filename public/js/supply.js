@@ -14,12 +14,12 @@ const idSupply = document.getElementById('id-supply')
 const numberSupply = document.getElementById('number-supply')
 const dateSupply = document.getElementById('dateSupply')
 const tableSupply = document.getElementById('product-table'); // Получаем ссылку на таблицу номенклатуры поставки
+const loader = document.getElementById('loader');
 
 let supplyID = ''
 let numberRow = 0
 let productID
 
-let arrQuickList = []
 let arrQuickProviders = []
 let arrQuickCarriers = []
 let arrQuickTransports = []
@@ -87,6 +87,24 @@ document.getElementById('edit-number-btn').addEventListener('click', () => numbe
 
 //Завершение редактирования номера поставки
 numberSupply.addEventListener('change', () => numberSupply.readOnly = true)
+
+// Перемещение выбранного элемента в начало списка
+selectProvider.addEventListener('change', () => {
+    const selectedOption = selectProvider.options[selectProvider.selectedIndex];
+    selectProvider.insertBefore(selectedOption, selectProvider.firstChild);    
+})
+
+// Перемещение выбранного элемента в начало списка
+selectCarrier.addEventListener('change', () => {
+    const selectedOption = selectCarrier.options[selectCarrier.selectedIndex];
+    selectCarrier.insertBefore(selectedOption, selectCarrier.firstChild);    
+})
+
+// Перемещение выбранного элемента в начало списка
+selectTransport.addEventListener('change', () => {
+    const selectedOption = selectTransport.options[selectTransport.selectedIndex];
+    selectTransport.insertBefore(selectedOption, selectTransport.firstChild);    
+})
 
 // Получение днных для фильтрации таблицы контрагенты
 counterparty.addEventListener('input', () => {
@@ -384,10 +402,12 @@ tableSupply.addEventListener('click', (event) => {
 
 // Отправка запроса
 const sendData = async (url, data) => {
-
+  try {
+    // 1. Показываем заставку (удаляем класс скрытия)
+    loader.classList.remove('hidden'); 
     const response = await fetch(url, {
         method: 'POST',
-        body: data,
+        body: data
     })
 
     if (!response.ok) {
@@ -399,6 +419,13 @@ const sendData = async (url, data) => {
     }
 
     return await response.json()
+  } catch (error) {
+    playErrorSound();
+    console.error('Ошибка запроса:', error);
+  } finally {
+    // 3. Убираем заставку в любом случае (даже при ошибке)
+    loader.classList.add('hidden'); 
+  }    
 }
 
 function getAddress() {
@@ -449,17 +476,24 @@ function reqProducts() {
 /* POST запрос на получение данных заполнения новой поставки */
 function initialization() {
     // console.log(convertDate(dateSupply.value))
-    reqCounterparties()
-    reqTransports()
-    reqProducts()
     numberSupply.readOnly = true
-    sendData(`http://${getAddress()}/users/post/3`, JSON.stringify({
-        text: 'supply',
+    sendData(`http://${getAddress()}/users/post/1`, JSON.stringify({
+        text: 'newSupply'
     })).then((data) => {
-        if (!data.result) {toast(data.text)}
-        else {
+        if (!data.result) {
+            playErrorSound();
+            toast(data.text)
+        } else {
             fillSelectList(data.quickList)
-            if (+idSupply.textContent !== 0) { reqOpenSupply() } else {
+            arrCounterparties = data.CPs
+            fillTableCounterpaties()
+            arrTransports = data.transports
+            fillTableTtansports()
+            arrProducts = data.products
+
+            if (+idSupply.textContent !== 0) { 
+                reqOpenSupply()
+            } else {                
                 arrMainStart = createArraySave()
                 arrTableStart = fillArrTable()
             }
@@ -470,53 +504,17 @@ function initialization() {
 //Запрос POST на открытие поставки
 function reqOpenSupply() {
     toast('Очікуйте завантаження.')
-    sendData(`http://${getAddress()}/users/post/11`, JSON.stringify({
+    sendData(`http://${getAddress()}/users/post/1`, JSON.stringify({
         text: 'openSupply',
         id: +idSupply.textContent
     })).then((data) => {
         if (!data.result) {
+            playErrorSound();
             toast(data.text)
         } else {
-            if (data.quickList) {fillQuickList(data.quickList)}
-            const main = data.main[0]
-            const table = data.table
-            supplyID = main.id
-            numberSupply.value = main.number
-            dateSupply.value = formatDate1(new Date(main.date))
-            document.getElementById('ttn').value = main.ttn
-            document.getElementById('notes').value = main.notes.replaceAll("`", "'")
-            let newOption
-            let optionToFind
-            // Ищем option с определенным value
-            optionToFind = selectProvider.querySelector(`option[value="${main.Provider}"]`);
-
-            // Если не нашли, добавляем
-            if (!optionToFind) {
-                newOption = new Option(main.nameProvider, main.Provider);
-                selectProvider.appendChild(newOption, 0);
-            }
-            selectProvider.value = main.Provider;
-
-            // Ищем option с определенным value
-            optionToFind = selectCarrier.querySelector(`option[value="${main.Carrier}"]`);
-
-            // Если не нашли, добавляем
-            if (!optionToFind) {
-                newOption = new Option(main.nameCarrier, main.Carrier);
-                selectCarrier.appendChild(newOption, 0);
-            }
-            selectCarrier.value = main.Carrier;
-
-            // Ищем option с определенным value
-            optionToFind = selectTransport.querySelector(`option[value="${main.Transport}"]`);
-
-            // Если не нашли, добавляем
-            if (!optionToFind) {
-                newOption = new Option(main.nameTransport, main.Transport);
-                selectTransport.appendChild(newOption, 0);
-            }
-            selectTransport.value = main.Transport;
-            addRowTable(table)
+            fillSelectList(data.quickList)
+            setSelectMain(data.main)
+            addRowTable(data.table)
             toast('Завантажено!')
             arrMainStart = createArraySave()
             arrTableStart = fillArrTable()
@@ -525,49 +523,116 @@ function reqOpenSupply() {
 
 }
 
+function setSelectMain(table) {
+            const main = table[0]
+            supplyID = main.id
+            numberSupply.value = main.number
+            dateSupply.value = formatDate1(new Date(main.date))
+            document.getElementById('ttn').value = main.ttn
+            document.getElementById('notes').value = main.notes.replaceAll("`", "'")
+            let newOption
+            let optionToFind
+
+            if (main.Provider) {
+                // Ищем option с определенным value
+                optionToFind = selectProvider.querySelector(`option[value="${main.Provider}"]`);
+
+                // Если не нашли, добавляем
+                if (!optionToFind) {
+                    newOption = new Option(main.nameProvider, main.Provider);
+                    selectProvider.add(newOption, 0);
+                } else {
+                    selectProvider.prepend(optionToFind);
+                }
+                selectProvider.value = main.Provider;
+            }
+
+            if (main.Carrier) {
+                // Ищем option с определенным value
+                optionToFind = selectCarrier.querySelector(`option[value="${main.Carrier}"]`);
+
+                // Если не нашли, добавляем
+                if (!optionToFind) {
+                    newOption = new Option(main.nameCarrier, main.Carrier);
+                    // selectCarrier.appendChild(newOption, 0);
+                    selectCarrier.add(newOption, 0);
+                } else {
+                    selectCarrier.prepend(optionToFind);
+                }
+                selectCarrier.value = main.Carrier;
+            }
+            if (main.Transport) {
+                // Ищем option с определенным value
+                optionToFind = selectTransport.querySelector(`option[value="${main.Transport}"]`);
+
+                // Если не нашли, добавляем
+                if (!optionToFind) {
+                    newOption = new Option(main.nameTransport, main.Transport);
+                    selectTransport.add(newOption, 0);
+                } else {
+                    selectTransport.prepend(optionToFind);
+                }
+                selectTransport.value = main.Transport;
+            }
+} 
+
 // Запрос на сохранение данных поставки
 function reqSaveSupply() {
+    const timeStart = performance.now()
     fillArrTable()
-    fillQuickList()
-    sendData(`http://${getAddress()}/users/post/10`, JSON.stringify({
+    // fillQuickList()
+    sendData(`http://${getAddress()}/users/post/1`, JSON.stringify({
         text: 'saveSupply',
         main: createArraySave(),
         table: arrTable,
-        quickList: arrQuickList,
+        quickList: fillQuickList(),
         arrQuickProviders: arrQuickProviders
     })).then((data) => {
         if (!data.result) {
+            playErrorSound();
             toast(data.text)
         } else {
             if (+idSupply.textContent === 0) {
-                window.location.href = `http://${getAddress()}/supply/${data.main.id}`
+                // window.location.href = `http://${getAddress()}/supply/${data.main.id}`
+                // Изменить URL на /new-path без перезагрузки
+                const stateObj = { page: 1 };
+                history.pushState(stateObj, '', `http://${getAddress()}/supply/${data.main.id}`);
             }
             arrSupply = data.main
-            //idSupply.textContent = data.main.id
+            idSupply.textContent = data.main.id
+            supplyID = data.main.id
             numberSupply.value = data.main.number
             toast('Надходження збережено.')
         }
     })
     arrMainStart = createArraySave()
     arrTableStart = fillArrTable()
+    const timeEnd = performance.now()
+    console.log(`Time taken: ${timeEnd - timeStart} ms`)
 }
 
-//Формирование массива для сохранения
+//Формирование массива QuickList для сохранения
 function fillQuickList() {
-    arrQuickList = []
-    arrQuickProviders.reverse().forEach((obj) => {
-        arrQuickList.unshift({ type: 'Provider', id: obj.value, name: obj.text })
+    const arrQuickList = []
+    const arrSelect = [
+        {obj: selectProvider, name: 'Provider'},
+        {obj: selectCarrier, name: 'Carrier'},
+        {obj: selectTransport, name: 'Transport'}
+    ]
+
+    arrSelect.forEach((arr) => {
+        const options = arr.obj.options;
+
+        // Определяем стартовый индекс: либо 6 (7-й элемент), либо последний, если элементов меньше 7
+        const startIndex = Math.min(options.length, 7) - 1;
+
+        // Идем от стартового индекса вниз до 0
+        for (let i = startIndex; i >= 0; i--) {
+            const option = options[i];
+            arrQuickList.unshift({ type: arr.name, id: option.value, name: option.text })
+        }
     })
-    arrQuickCarriers.reverse().forEach((obj) => {
-        arrQuickList.unshift({ type: 'Carrier', id: obj.value, name: obj.text })
-    })
-    arrQuickTransports.reverse().forEach((obj) => {
-        arrQuickList.unshift({ type: 'Transport', id: obj.value, name: obj.text })
-    })
-    arrQuickProducts.reverse().forEach((obj) => {
-        arrQuickList.unshift({ type: 'Nomenclature', id: obj.value, name: obj.text })
-    })
-    // console.log(arrQuickList)
+
     return arrQuickList
 }
 
@@ -584,6 +649,7 @@ function reqSaveCounterparty() {
         table: fillArrCouterparty()
     })).then((data) => {
         if (!data.result) {
+            playErrorSound();
             toast('Помика збереження!')
         } else {
             counterpartyID = data.id
@@ -624,7 +690,7 @@ function reqSaveTransport() {
 
 //Заполнение таблицы выбора конрагентов
 function fillTableCounterpaties(data) {
-
+    // console.log(arrCounterparties.length)
     if (arrCounterparties.length === 0) return false
     let arrTemp = arrCounterparties
     if (data) {
@@ -647,7 +713,7 @@ function fillTableCounterpaties(data) {
 
     let html = ``
 
-    if (arrTemp.length !== 0) {
+    if (arrTemp.length > 0) {
         for (let i = 0; i < arrTemp.length; i++) {
             html += `<tr data-id="${arrTemp[i].id}" data-name="${arrTemp[i].name}">
                         <td >${arrTemp[i].name}</td>
@@ -1231,3 +1297,27 @@ function highlightTextInTable(table, searchText) {
         }
     });
 }
+
+// Звук ошибки
+function playErrorSound() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  // Тип волны: 'sawtooth' (пилообразная) дает резкий, неприятный звук ошибки
+  oscillator.type = 'sawtooth';
+  // Низкая частота для звука ошибки (например, 150 Гц)
+  oscillator.frequency.setValueAtTime(150, audioCtx.currentTime); 
+  // Чуть опускаем частоту в конце для эффекта «сбоя»
+  oscillator.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.15);
+
+  gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.start();
+  oscillator.stop(audioCtx.currentTime + 0.15);
+}
+
